@@ -10,11 +10,22 @@ import Fianco.GameLogic.GameState;
 
 public class Grid extends JPanel {
 
-    private static final float PIECE_SCALE = 0.8f;
+    /**
+     * How much of the cell should the piece take up.
+     */
+    public static final float PIECE_SCALE = 0.8f;
 
-    private static final String[] COLS = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
-    private static final String[] ROWS = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+    public static final Color GRAY_ACCENT = new Color(170, 170, 170);
 
+    // chess positions
+    public static final String[] COLS = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
+    public static final String[] ROWS = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+    // util for animating piece movement
+    int[] selected = new int[] {-1, -1};
+    int[] cursor = new int[] {-1, -1};
+
+    // current game state
     private GameState gameState;
 
     public void updateGameState(GameState gameState) {
@@ -41,7 +52,13 @@ public class Grid extends JPanel {
         if (this.gameState == null) return;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                if (this.gameState.board[i][j] == 1) {
+                if (this.selected[0] == i && this.selected[1] == j) {
+                    g.setColor(GRAY_ACCENT);
+                    g.fillOval((int)(j * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]),
+                               (int)(i * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+                               (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+                }
+                else if (this.gameState.board[i][j] == 1) {
                     g.setColor(Color.WHITE);
                     g.fillOval((int)(j * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
                                (int)(i * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
@@ -54,19 +71,51 @@ public class Grid extends JPanel {
                 }
             }
         }
+
+        // cursor (when dragging a piece)
+        if (this.cursor[0] != -1 && this.cursor[1] != -1) {
+            g.setColor(Color.RED);
+            g.fillOval((int)(this.cursor[0] + (0.5f - PIECE_SCALE) * delta[0]),
+                       (int)(this.cursor[1] + (0.5f - PIECE_SCALE) * delta[1]), 
+                       (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
+        }
     }
 
     /**
-     * Converts a pixel position to a board position.
+     * Moves a piece on the board.
+     * @param x_from
+     * @param y_from
+     * @param to
+     */
+    public void movePiece(int[] from, int[] to) {
+        this.gameState.board[to[0]][to[1]] = this.gameState.board[from[0]][from[1]];
+        if (from[0] != to[0] || from[1] != to[1]) this.gameState.board[from[0]][from[1]] = 0;
+    }
+
+    public boolean isOccupied(int[] index) {
+        if (index[0] == -1) return false;
+        return this.gameState.board[index[0]][index[1]] != 0;
+    }
+
+    /**
+     * Converts a pixel position to an array index.
      * @param x
      * @param y
-     * @return the board position given in chess notation.
+     * @return
      */
-    public String getPos(int x, int y) {
+    public int[] getIndex(int x, int y) {
         Dimension vis = this.getVisibleRect().getSize();
-        float[] delta = {vis.width/9.0f, vis.height/9.0f};
-        int col = (int)(x / delta[0]);
-        int row = 8 - (int)(y / delta[1]);
-        return COLS[col] + ROWS[Math.max(row, 0)];
+        int col = Math.max(Math.min((int)(x / (vis.width/9.0f)), 8), 0);
+        int row = Math.max(Math.min((int)(y / (vis.height/9.0f)), 8), 0);
+        return new int[]{row, col};
+    }
+
+    /**
+     * Converts an array index to a chess position.
+     * @param index
+     * @return
+     */
+    public String getChessPos(int[] index) {
+        return COLS[index[1]] + ROWS[8 - index[0]];
     }
 }

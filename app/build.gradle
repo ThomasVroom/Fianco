@@ -26,7 +26,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'Fianco.App'
+    mainClass = 'Fianco.Main'
 }
 
 tasks.named('test') {

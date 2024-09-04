@@ -17,17 +17,54 @@ public class UserInput extends MouseMotionAdapter implements MouseInputListener 
 
     @Override
     public void mousePressed(MouseEvent e) {
-        System.out.println("pressed at " + grid.getPos(e.getX(), e.getY()));
+        // get the index of the cell that was clicked
+        int[] index = grid.getIndex(e.getX(), e.getY());
+        if (!grid.isOccupied(index)) return;
+
+        // update cursor location
+        grid.cursor[0] = e.getX();
+        grid.cursor[1] = e.getY();
+
+        // update selected location
+        grid.selected[0] = index[0];
+        grid.selected[1] = index[1];
+
+        // repaint the grid
+        grid.repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        System.out.println("released at " + grid.getPos(e.getX(), e.getY()));
+        // get the index of the cell that was released
+        int[] index = grid.getIndex(e.getX(), e.getY());
+        if (!grid.isOccupied(grid.selected)) return;
+
+        // move the piece from the selected cell to the released cell
+        grid.movePiece(grid.selected, index);
+        System.out.println("moved from " + grid.getChessPos(grid.selected)
+                                + " to " + grid.getChessPos(index)
+        );
+        
+        // reset util variables
+        grid.cursor[0] = -1;
+        grid.cursor[1] = -1;
+        grid.selected[0] = -1;
+        grid.selected[1] = -1;
+
+        // repaint the grid
+        grid.repaint();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        System.out.println("moved to " + e.getX() + " " + e.getY());
+        if (!grid.isOccupied(grid.selected)) return;
+
+        // update cursor location
+        grid.cursor[0] = e.getX();
+        grid.cursor[1] = e.getY();
+
+        // repaint the grid
+        grid.repaint();
     }
 
     @Override
