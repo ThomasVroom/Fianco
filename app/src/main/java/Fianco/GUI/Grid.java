@@ -16,20 +16,26 @@ public class Grid extends JPanel {
     public static final float PIECE_SCALE = 0.8f;
 
     public static final Color GRAY_ACCENT = new Color(170, 170, 170);
+    public static final Color GREEN_ACCENT = new Color(160, 180, 160);
 
-    // chess positions
-    public static final String[] COLS = {"A", "B", "C", "D", "E", "F", "G", "H", "I"};
-    public static final String[] ROWS = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-
-    // util for animating piece movement
+    // util for piece movement
+    boolean allowMove = false;
     int[] selected = new int[] {-1, -1};
     int[] cursor = new int[] {-1, -1};
+    int[] target = new int[] {-1, -1};
+    int[][] legalMoves = new int[0][0];
 
     // current game state
     private GameState gameState;
 
     public void updateGameState(GameState gameState) {
         this.gameState = gameState;
+    }
+
+    // returns true if the index is a piece that can be moved
+    public boolean canMove(int[] index) {
+        byte piece = this.gameState.board[index[0]][index[1]];
+        return gameState.turnIsP1 ? piece == 1 : piece == 2;
     }
     
     @Override
@@ -46,6 +52,23 @@ public class Grid extends JPanel {
         for (int i = 0; i < 9; i++) {
             g.drawLine((int)(i * delta[0]), 0, (int)(i * delta[0]), vis.height);
             g.drawLine(0, (int)(i * delta[1]), vis.width, (int)(i * delta[1]));
+        }
+
+        // legal moves
+        for (int i = 0; i < this.legalMoves.length; i++) {
+            g.setColor(GREEN_ACCENT);
+            if (this.selected[0] != -1) {
+                if (this.selected[0] == this.legalMoves[i][0] && this.selected[1] == this.legalMoves[i][1]) {
+                    g.fillOval((int)(this.legalMoves[i][3] * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
+                       (int)(this.legalMoves[i][2] * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+                       (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+                }
+            }
+            else {
+                g.fillOval((int)(this.legalMoves[i][3] * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
+                       (int)(this.legalMoves[i][2] * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+                       (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+            }
         }
 
         // game state
@@ -81,41 +104,11 @@ public class Grid extends JPanel {
         }
     }
 
-    /**
-     * Moves a piece on the board.
-     * @param x_from
-     * @param y_from
-     * @param to
-     */
-    public void movePiece(int[] from, int[] to) {
-        this.gameState.board[to[0]][to[1]] = this.gameState.board[from[0]][from[1]];
-        if (from[0] != to[0] || from[1] != to[1]) this.gameState.board[from[0]][from[1]] = 0;
-    }
-
-    public boolean isOccupied(int[] index) {
-        if (index[0] == -1) return false;
-        return this.gameState.board[index[0]][index[1]] != 0;
-    }
-
-    /**
-     * Converts a pixel position to an array index.
-     * @param x
-     * @param y
-     * @return
-     */
+    // converts a pixel position to an array index
     public int[] getIndex(int x, int y) {
         Dimension vis = this.getVisibleRect().getSize();
         int col = Math.max(Math.min((int)(x / (vis.width/9.0f)), 8), 0);
         int row = Math.max(Math.min((int)(y / (vis.height/9.0f)), 8), 0);
         return new int[]{row, col};
-    }
-
-    /**
-     * Converts an array index to a chess position.
-     * @param index
-     * @return
-     */
-    public String getChessPos(int[] index) {
-        return COLS[index[1]] + ROWS[8 - index[0]];
     }
 }

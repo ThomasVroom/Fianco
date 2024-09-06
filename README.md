@@ -9,8 +9,6 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
 - Experiments and plots are recommended.
 
 TODO:
- - Only legal moves (only forward / sideways, not on top of other pieces, you have to capture)
- - Game loop
- - AI framework
- - Chess notation overlay
  - Menu bar
+ - Optimize
+ - AI
