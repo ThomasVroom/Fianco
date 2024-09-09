@@ -20,7 +20,7 @@ public class UserInput extends MouseMotionAdapter implements MouseInputListener 
         if (!grid.allowMove) return;
 
         // get the index of the cell that was clicked
-        int[] index = grid.getIndex(e.getX(), e.getY());
+        int index = grid.getIndex(e.getX(), e.getY());
         if (!grid.canMove(index)) return;
 
         // update cursor location
@@ -28,8 +28,7 @@ public class UserInput extends MouseMotionAdapter implements MouseInputListener 
         grid.cursor[1] = e.getY();
 
         // update selected location
-        grid.selected[0] = index[0];
-        grid.selected[1] = index[1];
+        grid.selected = index;
 
         // repaint the grid
         grid.repaint();
@@ -37,19 +36,18 @@ public class UserInput extends MouseMotionAdapter implements MouseInputListener 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (!grid.allowMove) return;
+        if (!grid.allowMove || grid.selected == -1) return;
 
         // get the index of the cell that was released
-        int[] index = grid.getIndex(e.getX(), e.getY());
+        int index = grid.getIndex(e.getX(), e.getY());
 
         // update the target location
-        grid.target[0] = index[0];
-        grid.target[1] = index[1];
+        grid.target = index;
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (!grid.allowMove || grid.selected[0] == -1) return;
+        if (!grid.allowMove || grid.selected == -1) return;
 
         // update cursor location
         grid.cursor[0] = e.getX();

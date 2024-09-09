@@ -1,6 +1,7 @@
 package Fianco.GUI;
 
 import java.awt.Dimension;
+import java.util.BitSet;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -50,7 +51,7 @@ public class GUI extends JFrame {
         grid.repaint();
 
         // wait for the user to make a move
-        while (grid.target[1] == -1) {
+        while (grid.target == -1) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -58,32 +59,24 @@ public class GUI extends JFrame {
             }
         }
 
-        Move move = new Move((byte)grid.selected[0],
-                             (byte)grid.selected[1],
-                             (byte)grid.target[0],
-                             (byte)grid.target[1],
-                             Math.abs(grid.target[0] - grid.selected[0]) == 2);
+        Move move = new Move((byte)grid.selected, (byte)grid.target, Math.abs(grid.target - grid.selected) > 9);
 
         // reset util variables
         grid.cursor[0] = -1;
         grid.cursor[1] = -1;
-        grid.selected[0] = -1;
-        grid.selected[1] = -1;
-        grid.target[0] = -1;
-        grid.target[1] = -1;
+        grid.selected = -1;
+        grid.target = -1;
         grid.allowMove = false;
-        grid.legalMoves = new int[0][0];
+        grid.legalMoves = new int[0];
 
         return move;
     }
 
-    public void showLegalMoves(Move[] legalMoves) {
-        int[][] moves = new int[legalMoves.length][4];
-        for (int i = 0; i < legalMoves.length; i++) {
-            moves[i][0] = legalMoves[i].fromX;
-            moves[i][1] = legalMoves[i].fromY;
-            moves[i][2] = legalMoves[i].toX;
-            moves[i][3] = legalMoves[i].toY;
+    // shows the legal moves on the gui
+    public void showLegalMoves(BitSet legalMoves) {
+        int[] moves = new int[legalMoves.cardinality()];
+        for (int i = legalMoves.nextSetBit(0), j = 0; i != -1; i = legalMoves.nextSetBit(i + 1), j++) {
+            moves[j] = i;
         }
         grid.legalMoves = moves;
     }

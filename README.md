@@ -9,6 +9,6 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
 - Experiments and plots are recommended.
 
 TODO:
+ - fix bugs and todos
  - Menu bar
- - Optimize
  - AI

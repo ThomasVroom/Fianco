@@ -1,6 +1,6 @@
 package Fianco.GameLogic;
 
-import java.util.List;
+import java.util.BitSet;
 
 import Fianco.GUI.GUI;
 
@@ -23,15 +23,16 @@ public class InputController {
         this.playerType = playerType;
     }
 
-    public Move getMove(GameState state, List<Move> legalMoves) {
+    public Move getMove(GameState state, BitSet legalMoves) {
         Move move = null;
         if (playerType == PlayerType.HUMAN) {
-            while (!legalMoves.contains(move)) {
-                gui.showLegalMoves(legalMoves.toArray(new Move[0]));
+            do {
+                gui.showLegalMoves(legalMoves);
                 move = gui.getMove();
-            }
+            } while (!legalMoves.get(move.to)); // TODO bug: move.from is not checked
             return move;
         }
+        // TODO: implement AI interface
         return null;
     }
 

@@ -15,15 +15,16 @@ public class Grid extends JPanel {
      */
     public static final float PIECE_SCALE = 0.8f;
 
+    // colors for moving pieces
     public static final Color GRAY_ACCENT = new Color(170, 170, 170);
     public static final Color GREEN_ACCENT = new Color(160, 180, 160);
 
     // util for piece movement
     boolean allowMove = false;
-    int[] selected = new int[] {-1, -1};
+    int selected = -1;
     int[] cursor = new int[] {-1, -1};
-    int[] target = new int[] {-1, -1};
-    int[][] legalMoves = new int[0][0];
+    int target = -1;
+    int[] legalMoves = new int[0];
 
     // current game state
     private GameState gameState;
@@ -33,9 +34,8 @@ public class Grid extends JPanel {
     }
 
     // returns true if the index is a piece that can be moved
-    public boolean canMove(int[] index) {
-        byte piece = this.gameState.board[index[0]][index[1]];
-        return gameState.turnIsP1 ? piece == 1 : piece == 2;
+    public boolean canMove(int index) {
+        return (this.gameState.turnIsP1 ? this.gameState.bitBoardP1 : this.gameState.bitBoardP2).get(index);
     }
     
     @Override
@@ -55,43 +55,49 @@ public class Grid extends JPanel {
         }
 
         // legal moves
+        // TODO: optimize repeated calculations
         for (int i = 0; i < this.legalMoves.length; i++) {
             g.setColor(GREEN_ACCENT);
-            if (this.selected[0] != -1) {
-                if (this.selected[0] == this.legalMoves[i][0] && this.selected[1] == this.legalMoves[i][1]) {
-                    g.fillOval((int)(this.legalMoves[i][3] * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
-                       (int)(this.legalMoves[i][2] * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+            if (this.selected != -1) {
+                if (this.selected == this.legalMoves[i]) { // TODO bug: need to be able to get a "from" index
+                    g.fillOval((int)(this.legalMoves[i] % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
+                       (int)(this.legalMoves[i] / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
                        (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
                 }
             }
             else {
-                g.fillOval((int)(this.legalMoves[i][3] * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
-                       (int)(this.legalMoves[i][2] * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+                g.fillOval((int)(this.legalMoves[i] % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
+                       (int)(this.legalMoves[i] / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
                        (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
             }
         }
 
         // game state
-        if (this.gameState == null) return;
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                if (this.selected[0] == i && this.selected[1] == j) {
-                    g.setColor(GRAY_ACCENT);
-                    g.fillOval((int)(j * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]),
-                               (int)(i * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
-                               (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
-                }
-                else if (this.gameState.board[i][j] == 1) {
-                    g.setColor(Color.WHITE);
-                    g.fillOval((int)(j * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
-                               (int)(i * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
-                               (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
-                } else if (this.gameState.board[i][j] == 2) {
-                    g.setColor(Color.BLACK);
-                    g.fillOval((int)(j * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
-                               (int)(i * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
-                               (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
-                }
+        for (int i = this.gameState.bitBoardP1.nextSetBit(0); i != -1; i = this.gameState.bitBoardP1.nextSetBit(i + 1)) {
+            if (this.selected == i) {
+                g.setColor(GRAY_ACCENT);
+                g.fillOval((int)(i % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]),
+                           (int)(i / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+                           (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+            }
+            else {
+                g.setColor(Color.WHITE);
+                g.fillOval((int)(i % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
+                           (int)(i / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
+                           (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
+            }
+        }
+        for (int i = this.gameState.bitBoardP2.nextSetBit(0); i != -1; i = this.gameState.bitBoardP2.nextSetBit(i + 1)) {
+            if (this.selected == i) {
+                g.setColor(GRAY_ACCENT); // TODO: duplicate code
+                g.fillOval((int)(i % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]),
+                           (int)(i / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
+                           (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+            } else {
+                g.setColor(Color.BLACK);
+                g.fillOval((int)(i % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
+                           (int)(i / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
+                           (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
             }
         }
 
@@ -104,11 +110,11 @@ public class Grid extends JPanel {
         }
     }
 
-    // converts a pixel position to an array index
-    public int[] getIndex(int x, int y) {
+    // converts a pixel position to a board index
+    public int getIndex(int x, int y) {
         Dimension vis = this.getVisibleRect().getSize();
         int col = Math.max(Math.min((int)(x / (vis.width/9.0f)), 8), 0);
         int row = Math.max(Math.min((int)(y / (vis.height/9.0f)), 8), 0);
-        return new int[]{row, col};
+        return row * 9 + col;
     }
 }
