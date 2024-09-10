@@ -1,38 +1,14 @@
 package Fianco.GameLogic;
 
-import java.util.BitSet;
+import java.util.TreeSet;
+import java.util.SortedSet;
+import java.util.List;
+import java.util.ArrayList;
 
 public class GameState {
 
-    // https://stackoverflow.com/a/69290602
-    public static BitSet shift(BitSet bitset, int shiftAmount) {
-        BitSet b = new BitSet(81);
-        bitset.stream().map(bitPos -> bitPos + shiftAmount)
-                .dropWhile(bitPos -> bitPos < 0)
-                .forEach(bitPos -> b.set(bitPos));
-        return b;
-    }
-
-    // mask applied when shifting left to prevent wrapping
-    public static final BitSet shiftLeftMask = BitSet.valueOf(new long[] {
-        0b00000000100000000100000000100000000100000000100000000100000000100000000L,
-        0b000000010000000010000000L
-    });
-
-    // mask applied when shifting right to prevent wrapping
-    public static final BitSet shiftRightMask = BitSet.valueOf(new long[] {
-        0b1000000001000000001000000001000000001000000001000000001000000001L,
-        0b00000000100000000100000000L
-    });
-
-    // mask applied when shifting down to prevent wrapping
-    public static final BitSet shiftDownMask = BitSet.valueOf(new long[] {
-        0b0000000000000000000000000000000000000000000000000000000000000000L,
-        0b000000000000000011111111100000000000000000L
-    });
-
-    public BitSet bitBoardP1 = new BitSet(81);
-    public BitSet bitBoardP2 = new BitSet(81);
+    public SortedSet<Byte> p1Pieces;
+    public SortedSet<Byte> p2Pieces;
     
     public boolean turnIsP1;
 
@@ -40,43 +16,39 @@ public class GameState {
     public static GameState initialState() {
         GameState s = new GameState();
 
-        s.bitBoardP1.set(80);
-        s.bitBoardP1.set(79);
-        s.bitBoardP1.set(78);
-        s.bitBoardP1.set(77);
-        s.bitBoardP1.set(76);
-        s.bitBoardP1.set(75);
-        s.bitBoardP1.set(74);
-        s.bitBoardP1.set(73);
-        s.bitBoardP1.set(72);
+        s.p1Pieces = new TreeSet<Byte>();
+        s.p1Pieces.add((byte)72);
+        s.p1Pieces.add((byte)73);
+        s.p1Pieces.add((byte)74);
+        s.p1Pieces.add((byte)75);
+        s.p1Pieces.add((byte)76);
+        s.p1Pieces.add((byte)77);
+        s.p1Pieces.add((byte)78);
+        s.p1Pieces.add((byte)79);
+        s.p1Pieces.add((byte)80);
+        s.p1Pieces.add((byte)64);
+        s.p1Pieces.add((byte)70);
+        s.p1Pieces.add((byte)56);
+        s.p1Pieces.add((byte)60);
+        s.p1Pieces.add((byte)48);
+        s.p1Pieces.add((byte)50);
 
-        s.bitBoardP1.set(70);
-        s.bitBoardP1.set(64);
-
-        s.bitBoardP1.set(60);
-        s.bitBoardP1.set(56);
-
-        s.bitBoardP1.set(50);
-        s.bitBoardP1.set(48);
-
-        s.bitBoardP2.set(0);
-        s.bitBoardP2.set(1);
-        s.bitBoardP2.set(2);
-        s.bitBoardP2.set(3);
-        s.bitBoardP2.set(4);
-        s.bitBoardP2.set(5);
-        s.bitBoardP2.set(6);
-        s.bitBoardP2.set(7);
-        s.bitBoardP2.set(8);
-
-        s.bitBoardP2.set(10);
-        s.bitBoardP2.set(16);
-
-        s.bitBoardP2.set(20);
-        s.bitBoardP2.set(24);
-
-        s.bitBoardP2.set(30);
-        s.bitBoardP2.set(32);
+        s.p2Pieces = new TreeSet<Byte>();
+        s.p2Pieces.add((byte)0);
+        s.p2Pieces.add((byte)1);
+        s.p2Pieces.add((byte)2);
+        s.p2Pieces.add((byte)3);
+        s.p2Pieces.add((byte)4);
+        s.p2Pieces.add((byte)5);
+        s.p2Pieces.add((byte)6);
+        s.p2Pieces.add((byte)7);
+        s.p2Pieces.add((byte)8);
+        s.p2Pieces.add((byte)10);
+        s.p2Pieces.add((byte)16);
+        s.p2Pieces.add((byte)20);
+        s.p2Pieces.add((byte)24);
+        s.p2Pieces.add((byte)30);
+        s.p2Pieces.add((byte)32);
 
         s.turnIsP1 = true;
 
@@ -85,57 +57,119 @@ public class GameState {
 
     public boolean isGameOver() {
         return this.p1Wins() || this.p2Wins();
-        // TODO: check for draw
     }
 
     public boolean p1Wins() {
-        return this.bitBoardP1.nextSetBit(0) < 9;
+        if (this.p2Pieces.isEmpty()) return true;
+        return this.p1Pieces.first() < 9;
     }
 
     public boolean p2Wins() {
-        return this.bitBoardP2.nextSetBit(72) > 0;
+        if (this.p1Pieces.isEmpty()) return true;
+        return this.p2Pieces.last() >= 72;
     }
 
     public void step(Move move) {
-        BitSet from = this.turnIsP1 ? this.bitBoardP1 : this.bitBoardP2;
+        SortedSet<Byte> pieces = this.turnIsP1 ? this.p1Pieces : this.p2Pieces;
 
-        from.clear(move.from);
-        from.set(move.to);
+        pieces.remove(move.from);
+        pieces.add(move.to);
 
         if (move.isCapture) {
-            BitSet to = this.turnIsP1 ? this.bitBoardP2 : this.bitBoardP1;
-            to.clear((move.from + move.to) / 2);
+            SortedSet<Byte> opponent = this.turnIsP1 ? this.p2Pieces : this.p1Pieces;
+            byte target = (byte)((move.from + move.to) / 2);
+            opponent.remove(target);
         }
 
         this.turnIsP1 = !this.turnIsP1;
     }
 
     // returns a bitset of legal moves for the current player
-    public BitSet computeLegalMoves() {
-        BitSet legalMoves = new BitSet(81);
-        BitSet positions = this.turnIsP1 ? this.bitBoardP1 : this.bitBoardP2;
+    public List<Move> computeLegalMoves() {
+        List<Move> legalMoves = new ArrayList<Move>(15);
+        SortedSet<Byte> positions = this.turnIsP1 ? this.p1Pieces : this.p2Pieces;
+        SortedSet<Byte> opponent = this.turnIsP1 ? this.p2Pieces : this.p1Pieces;
+        byte target, capture_target;
 
-        // TODO: check if capture is possible
+        // check if capture is possible
+        for (byte position : positions) {
+            if (this.turnIsP1) {
+                // check left
+                if (position % 9 > 1 && position >= 18) {
+                    target = (byte)(position - 20);
+                    capture_target = (byte)(position - 10);
+                    if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
+                        legalMoves.add(new Move(position, target, true));
+                    }
+                }
 
-        BitSet up = shift(positions, this.turnIsP1 ? -9 : 9);
-        BitSet left = shift(positions, -1);
-        BitSet right = shift(positions, 1);
+                // check right
+                if (position % 9 < 7 && position >= 18) {
+                    target = (byte)(position - 16);
+                    capture_target = (byte)(position - 8);
+                    if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
+                        legalMoves.add(new Move(position, target, true));
+                    }
+                }
+            }
+            else {
+                // check left
+                if (position % 9 > 1 && position < 63) {
+                    target = (byte)(position + 16);
+                    capture_target = (byte)(position + 8);
+                    if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
+                        legalMoves.add(new Move(position, target, true));
+                    }
+                }
 
-        up.andNot(this.bitBoardP1);
-        up.andNot(this.bitBoardP2);
-        if (!this.turnIsP1) up.andNot(shiftDownMask);
+                // check right
+                if (position % 9 < 7 && position < 63) {
+                    target = (byte)(position + 20);
+                    capture_target = (byte)(position + 10);
+                    if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
+                        legalMoves.add(new Move(position, target, true));
+                    }
+                }
+            }
+        }
 
-        left.andNot(this.bitBoardP1);
-        left.andNot(this.bitBoardP2);
-        left.andNot(shiftLeftMask);
+        if (!legalMoves.isEmpty()) return legalMoves;
 
-        right.andNot(this.bitBoardP1);
-        right.andNot(this.bitBoardP2);
-        right.andNot(shiftRightMask);
+        for (byte position : positions) {
+            // check up
+            if (this.turnIsP1) {
+                if (position >= 9) {
+                    target = (byte)(position - 9);
+                    if (!positions.contains(target) && !opponent.contains(target)) {
+                        legalMoves.add(new Move(position, target, false));
+                    }
+                }
+            }
+            else {
+                if (position < 72) {
+                    target = (byte)(position + 9);
+                    if (!positions.contains(target) && !opponent.contains(target)) {
+                        legalMoves.add(new Move(position, target, false));
+                    }
+                }
+            }
 
-        legalMoves.or(up);
-        legalMoves.or(left);
-        legalMoves.or(right);
+            // check left
+            if (position % 9 > 0) {
+                target = (byte)(position - 1);
+                if (!positions.contains(target) && !opponent.contains(target)) {
+                    legalMoves.add(new Move(position, target, false));
+                }
+            }
+
+            // check right
+            if (position % 9 < 8) {
+                target = (byte)(position + 1);
+                if (!positions.contains(target) && !opponent.contains(target)) {
+                    legalMoves.add(new Move(position, target, false));
+                }
+            }
+        }
 
         return legalMoves;
     }

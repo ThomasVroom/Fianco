@@ -1,7 +1,8 @@
 package Fianco.GUI;
 
 import java.awt.Dimension;
-import java.util.BitSet;
+
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -67,17 +68,13 @@ public class GUI extends JFrame {
         grid.selected = -1;
         grid.target = -1;
         grid.allowMove = false;
-        grid.legalMoves = new int[0];
+        grid.legalMoves = null;
 
         return move;
     }
 
     // shows the legal moves on the gui
-    public void showLegalMoves(BitSet legalMoves) {
-        int[] moves = new int[legalMoves.cardinality()];
-        for (int i = legalMoves.nextSetBit(0), j = 0; i != -1; i = legalMoves.nextSetBit(i + 1), j++) {
-            moves[j] = i;
-        }
-        grid.legalMoves = moves;
+    public void showLegalMoves(List<Move> legalMoves) {
+        grid.legalMoves = legalMoves;
     }
 }

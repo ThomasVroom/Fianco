@@ -21,7 +21,7 @@ public class UserInput extends MouseMotionAdapter implements MouseInputListener 
 
         // get the index of the cell that was clicked
         int index = grid.getIndex(e.getX(), e.getY());
-        if (!grid.canMove(index)) return;
+        if (!grid.canMove((byte)index)) return;
 
         // update cursor location
         grid.cursor[0] = e.getX();

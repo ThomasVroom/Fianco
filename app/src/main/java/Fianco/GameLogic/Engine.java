@@ -1,6 +1,8 @@
 package Fianco.GameLogic;
 
-import java.util.BitSet;
+import java.util.List;
+
+import Fianco.GameLogic.InputController.PlayerType;
 
 public class Engine implements Runnable {
     
@@ -8,20 +10,25 @@ public class Engine implements Runnable {
     public InputController p1;
     public InputController p2;
 
-    public Engine() {
+    public Engine(PlayerType p1Type, PlayerType p2Type) {
         state = GameState.initialState();
-        p1 = new InputController(InputController.PlayerType.HUMAN);
-        p2 = new InputController(InputController.PlayerType.HUMAN);
+        p1 = new InputController(p1Type);
+        p2 = new InputController(p2Type);
     }
 
     @Override
     public void run() {
-        BitSet legalMoves;
+        List<Move> legalMoves;
         Move move;
 
         // main game loop
         while (!this.state.isGameOver()) {
             InputController.refreshGUI(this.state);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             legalMoves = this.state.computeLegalMoves();
             System.out.print("\033\143"); // clear terminal
             System.out.println("Turn: " + (this.state.turnIsP1 ? "White" : "Black"));
@@ -39,7 +46,6 @@ public class Engine implements Runnable {
             System.out.println("Black wins!");
             return;
         }
-        System.out.println("It's a draw!");
     }
 
     public void step(Move move) {

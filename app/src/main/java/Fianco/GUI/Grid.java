@@ -3,10 +3,12 @@ package Fianco.GUI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 import Fianco.GameLogic.GameState;
+import Fianco.GameLogic.Move;
 
 public class Grid extends JPanel {
 
@@ -14,6 +16,8 @@ public class Grid extends JPanel {
      * How much of the cell should the piece take up.
      */
     public static final float PIECE_SCALE = 0.8f;
+    public static final float PIECE_SCALE_SMALL = 0.4f;
+    public static final float PIECE_SCALE_OFF = 0.3f;
 
     // colors for moving pieces
     public static final Color GRAY_ACCENT = new Color(170, 170, 170);
@@ -24,7 +28,7 @@ public class Grid extends JPanel {
     int selected = -1;
     int[] cursor = new int[] {-1, -1};
     int target = -1;
-    int[] legalMoves = new int[0];
+    List<Move> legalMoves = null;
 
     // current game state
     private GameState gameState;
@@ -34,8 +38,8 @@ public class Grid extends JPanel {
     }
 
     // returns true if the index is a piece that can be moved
-    public boolean canMove(int index) {
-        return (this.gameState.turnIsP1 ? this.gameState.bitBoardP1 : this.gameState.bitBoardP2).get(index);
+    public boolean canMove(byte index) {
+        return (this.gameState.turnIsP1 ? this.gameState.p1Pieces : this.gameState.p2Pieces).contains(index);
     }
     
     @Override
@@ -55,48 +59,49 @@ public class Grid extends JPanel {
         }
 
         // legal moves
-        // TODO: optimize repeated calculations
-        for (int i = 0; i < this.legalMoves.length; i++) {
-            g.setColor(GREEN_ACCENT);
-            if (this.selected != -1) {
-                if (this.selected == this.legalMoves[i]) { // TODO bug: need to be able to get a "from" index
-                    g.fillOval((int)(this.legalMoves[i] % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
-                       (int)(this.legalMoves[i] / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
-                       (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+        if (this.legalMoves != null) {
+            for (Move move : this.legalMoves) {
+                g.setColor(GREEN_ACCENT);
+                if (this.selected != -1) {
+                    if (this.selected == move.from) {
+                        g.fillOval((int)(move.to % 9 * delta[0] + PIECE_SCALE_OFF * delta[0]), 
+                                   (int)(move.to / 9 * delta[1] + PIECE_SCALE_OFF * delta[1]), 
+                                   (int)(PIECE_SCALE_SMALL * delta[0]), (int)(PIECE_SCALE_SMALL * delta[1]));
+                    }
                 }
-            }
-            else {
-                g.fillOval((int)(this.legalMoves[i] % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]), 
-                       (int)(this.legalMoves[i] / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
-                       (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+                else {
+                    g.fillOval((int)(move.to % 9 * delta[0] + PIECE_SCALE_OFF * delta[0]), 
+                               (int)(move.to / 9 * delta[1] + PIECE_SCALE_OFF * delta[1]), 
+                               (int)(PIECE_SCALE_SMALL * delta[0]), (int)(PIECE_SCALE_SMALL * delta[1]));
+                }
             }
         }
 
         // game state
-        for (int i = this.gameState.bitBoardP1.nextSetBit(0); i != -1; i = this.gameState.bitBoardP1.nextSetBit(i + 1)) {
-            if (this.selected == i) {
+        for (byte b : this.gameState.p1Pieces) {
+            if (this.selected == b) {
                 g.setColor(GRAY_ACCENT);
-                g.fillOval((int)(i % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]),
-                           (int)(i / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
-                           (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+                g.fillOval((int)(b % 9 * delta[0] + PIECE_SCALE_OFF * delta[0]),
+                           (int)(b / 9 * delta[1] + PIECE_SCALE_OFF * delta[1]), 
+                           (int)(PIECE_SCALE_SMALL * delta[0]), (int)(PIECE_SCALE_SMALL * delta[1]));
             }
             else {
                 g.setColor(Color.WHITE);
-                g.fillOval((int)(i % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
-                           (int)(i / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
+                g.fillOval((int)(b % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
+                           (int)(b / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
                            (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
             }
         }
-        for (int i = this.gameState.bitBoardP2.nextSetBit(0); i != -1; i = this.gameState.bitBoardP2.nextSetBit(i + 1)) {
-            if (this.selected == i) {
-                g.setColor(GRAY_ACCENT); // TODO: duplicate code
-                g.fillOval((int)(i % 9 * delta[0] + (1 - 0.5f*PIECE_SCALE)/2 * delta[0]),
-                           (int)(i / 9 * delta[1] + (1 - 0.5f*PIECE_SCALE)/2 * delta[1]), 
-                           (int)(0.5f*PIECE_SCALE * delta[0]), (int)(0.5f*PIECE_SCALE * delta[1]));
+        for (byte b : this.gameState.p2Pieces) {
+            if (this.selected == b) {
+                g.setColor(GRAY_ACCENT);
+                g.fillOval((int)(b % 9 * delta[0] + PIECE_SCALE_OFF * delta[0]),
+                           (int)(b / 9 * delta[1] + PIECE_SCALE_OFF * delta[1]), 
+                           (int)(PIECE_SCALE_SMALL * delta[0]), (int)(PIECE_SCALE_SMALL * delta[1]));
             } else {
                 g.setColor(Color.BLACK);
-                g.fillOval((int)(i % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
-                           (int)(i / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
+                g.fillOval((int)(b % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
+                           (int)(b / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
                            (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
             }
         }
