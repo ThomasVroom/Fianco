@@ -7,6 +7,10 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JEditorPane;
+import javax.swing.UIManager;
 
 import Fianco.GameLogic.GameState;
 import Fianco.GameLogic.Move;
@@ -20,6 +24,8 @@ public class GUI extends JFrame {
     public static final int HEIGHT = 620;
 
     public Grid grid;
+
+    public MoveMenu movesMenuScroll;
     
     public GUI() {
         this.setTitle("Fianco");
@@ -28,9 +34,80 @@ public class GUI extends JFrame {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         JMenuBar menuBar = new JMenuBar();
-        menuBar.add(new JMenu("Options"));
-        menuBar.add(new JMenu("Moves"));
-        menuBar.add(new JMenu("Help"));
+        JMenu optionsMenu = new JMenu("Options");
+        JMenuItem newGame = new JMenuItem("New Game");
+        newGame.addActionListener(e -> {
+            // TODO
+        });
+        optionsMenu.add(newGame);
+        JMenuItem loadGame = new JMenuItem("Load Game");
+        loadGame.addActionListener(e -> {
+            // TODO
+        });
+        optionsMenu.add(loadGame);
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.addActionListener(e -> System.exit(0));
+        optionsMenu.add(exit);
+        menuBar.add(optionsMenu);
+        JMenu viewMenu = new JMenu("View");
+        JMenuItem showMoveGrid1 = new JMenuItem("Show Grid Numbers");
+        showMoveGrid1.addActionListener(e -> {
+            grid.showGridNumbers = !grid.showGridNumbers;
+            grid.showGridNames = false;
+            grid.repaint();
+        });
+        viewMenu.add(showMoveGrid1);
+        JMenuItem showMoveGrid2 = new JMenuItem("Show Grid Names");
+        showMoveGrid2.addActionListener(e -> {
+            grid.showGridNumbers = false;
+            grid.showGridNames = !grid.showGridNames;
+            grid.repaint();
+        });
+        viewMenu.add(showMoveGrid2);
+        JMenuItem showLegalMoves = new JMenuItem("Show Legal Moves");
+        showLegalMoves.addActionListener(e -> {
+            grid.showLegalMoves = !grid.showLegalMoves;
+            grid.repaint();
+        });
+        viewMenu.add(showLegalMoves);
+        menuBar.add(viewMenu);
+        JMenu movesMenu = new JMenu("Moves");
+        JMenuItem undo = new JMenuItem("Undo");
+        undo.addActionListener(e -> {
+            // TODO
+        });
+        movesMenu.add(undo);
+        movesMenu.addSeparator();
+        this.movesMenuScroll = new MoveMenu();
+        movesMenu.add(this.movesMenuScroll);
+        menuBar.add(movesMenu);
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem rules = new JMenuItem("Rules");
+        JEditorPane rulesMessage = new JEditorPane("text/html", ""+
+        "<center>Players take turns moving their stones.</center>\n"+
+        "<center>Each turn a player must move one of their stones. A stone may:</center>\n"+
+        "<center> ⚬ Move forwards or sideways to an adjacent empty square.</center>\n"+
+        "<center> ⚬ Capture by jumping diagonally forward over an enemy stone, landing on an empty square.</center>\n"+
+        "<center>Capturing is mandatory, but limited to one stone per turn.</center>\n"+
+        "<center>A player wins by moving one of their stones to the opposite side of the board.</center>");
+        rulesMessage.setEditable(false);
+        rulesMessage.setBackground(UIManager.getColor("OptionPane.background"));
+        rules.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, rulesMessage, "Rules", JOptionPane.PLAIN_MESSAGE);
+        });
+        helpMenu.add(rules);
+        JMenuItem about = new JMenuItem("About");
+        JEditorPane aboutMessage = new JEditorPane("text/html", ""+
+        "<center>Developed by Thomas Vroom, Maastricht University (©2024).</center>\n"+
+        "<center>Fianco is a game by Fred Horn (©1987).</center>\n"+
+        "<center><a href=\"http://www.di.fc.ul.pt/~jpn/gv/fianco.htm\">http://www.di.fc.ul.pt/~jpn/gv/fianco.htm</a></center>");
+        aboutMessage.setEditable(false);
+        aboutMessage.setBackground(UIManager.getColor("OptionPane.background"));
+        about.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, aboutMessage, "About", JOptionPane.PLAIN_MESSAGE);
+        });
+        helpMenu.add(about);
+        menuBar.add(helpMenu);
         this.setJMenuBar(menuBar);
 
         this.grid = new Grid();
@@ -76,5 +153,9 @@ public class GUI extends JFrame {
     // shows the legal moves on the gui
     public void showLegalMoves(List<Move> legalMoves) {
         grid.legalMoves = legalMoves;
+    }
+
+    public void addMove(Move move) {
+        this.movesMenuScroll.addMove(move);
     }
 }

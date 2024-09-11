@@ -30,6 +30,11 @@ public class Grid extends JPanel {
     int target = -1;
     List<Move> legalMoves = null;
 
+    // util for display
+    boolean showGridNumbers = false;
+    boolean showGridNames = true;
+    boolean showLegalMoves = true;
+
     // current game state
     private GameState gameState;
 
@@ -59,7 +64,7 @@ public class Grid extends JPanel {
         }
 
         // legal moves
-        if (this.legalMoves != null) {
+        if (this.showLegalMoves && this.legalMoves != null) {
             for (Move move : this.legalMoves) {
                 g.setColor(GREEN_ACCENT);
                 if (this.selected != -1) {
@@ -103,6 +108,24 @@ public class Grid extends JPanel {
                 g.fillOval((int)(b % 9 * delta[0] + (1 - PIECE_SCALE)/2 * delta[0]),
                            (int)(b / 9 * delta[1] + (1 - PIECE_SCALE)/2 * delta[1]), 
                            (int)(PIECE_SCALE * delta[0]), (int)(PIECE_SCALE * delta[1]));
+            }
+        }
+
+        // grid overlays
+        if (this.showGridNumbers) {
+            g.setColor(Color.BLACK);
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    g.drawString(String.valueOf(j * 9 + i), (int)((i + 0.02f) * delta[0]), (int)((j + 0.98f) * delta[1]));
+                }
+            }
+        }
+        else if (this.showGridNames) {
+            g.setColor(Color.BLACK);
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    g.drawString(Move.toAlgebraic((byte)(j * 9 + i)), (int)((i + 0.02f) * delta[0]), (int)((j + 0.98f) * delta[1]));
+                }
             }
         }
 

@@ -16,13 +16,19 @@ public class Engine implements Runnable {
         p2 = new InputController(p2Type);
     }
 
+    public Engine(GameState state, PlayerType p1Type, PlayerType p2Type) {
+        this.state = state;
+        p1 = new InputController(p1Type);
+        p2 = new InputController(p2Type);
+    }
+
     @Override
     public void run() {
         List<Move> legalMoves;
         Move move;
 
         // main game loop
-        while (!this.state.isGameOver()) {
+        while (!(this.state.p1Wins() || this.state.p2Wins())) {
             InputController.refreshGUI(this.state);
             try {
                 Thread.sleep(100);
@@ -50,5 +56,6 @@ public class Engine implements Runnable {
 
     public void step(Move move) {
         this.state.step(move);
+        InputController.addMoveToGUI(move);
     }
 }

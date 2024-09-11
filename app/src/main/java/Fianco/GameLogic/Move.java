@@ -9,6 +9,10 @@ public class Move {
     public static final char[] COLS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'};
     public static final char[] ROWS = {'9', '8', '7', '6', '5', '4', '3', '2', '1'};
 
+    public static String toAlgebraic(byte index) {
+        return "" + COLS[index % 9] + ROWS[index / 9];
+    }
+
     public Move(byte from, byte to, boolean isCapture) {
         this.from = from;
         this.to = to;
@@ -21,7 +25,7 @@ public class Move {
 
     @Override
     public String toString() {
-        return "" + COLS[from % 9] + ROWS[from / 9] + (isCapture ? 'x' : '-') + COLS[to % 9] + ROWS[to / 9];
+        return "" + toAlgebraic(from) + (isCapture ? 'x' : '-') + toAlgebraic(to);
     }
 
     @Override

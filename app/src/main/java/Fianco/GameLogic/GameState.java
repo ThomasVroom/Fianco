@@ -55,10 +55,6 @@ public class GameState {
         return s;
     }
 
-    public boolean isGameOver() {
-        return this.p1Wins() || this.p2Wins();
-    }
-
     public boolean p1Wins() {
         if (this.p2Pieces.isEmpty()) return true;
         return this.p1Pieces.first() < 9;

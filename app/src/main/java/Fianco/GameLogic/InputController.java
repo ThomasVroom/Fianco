@@ -49,4 +49,10 @@ public class InputController {
             gui.grid.repaint();
         }
     }
+
+    public static void addMoveToGUI(Move move) {
+        if (gui != null) {
+            gui.addMove(move);
+        }
+    }
 }
