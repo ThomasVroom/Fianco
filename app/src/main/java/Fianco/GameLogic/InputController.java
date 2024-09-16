@@ -14,6 +14,9 @@ public class InputController {
         RANDOM
     }
 
+    public static boolean undo = false;
+    public static Move undoBuffer = null;
+
     public PlayerType playerType;
 
     public Agent agent;
@@ -37,6 +40,13 @@ public class InputController {
             do {
                 gui.showLegalMoves(legalMoves);
                 move = gui.getMove();
+                if (gui.undo) { // undo
+                    undo = true;
+                    undoBuffer = gui.movesMenuScroll.undo();
+                    gui.undo = false;
+                    break;
+                }
+                if (move == null) break; // restart
             } while (!legalMoves.contains(move));
             return move;
         }
@@ -46,6 +56,7 @@ public class InputController {
     public static void refreshGUI(GameState state) {
         if (gui != null) {
             gui.updateGameState(state);
+            gui.setTitle("Fianco | Turn " + gui.movesMenuScroll.turnCount + ": " + (state.turnIsP1 ? "White" : "Black"));
             gui.grid.repaint();
         }
     }
@@ -54,5 +65,9 @@ public class InputController {
         if (gui != null) {
             gui.addMove(move);
         }
+    }
+
+    public static void resetGUI() {
+        gui.movesMenuScroll.clear();
     }
 }

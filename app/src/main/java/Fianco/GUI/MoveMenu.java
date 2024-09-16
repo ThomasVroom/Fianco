@@ -16,8 +16,8 @@ import Fianco.GameLogic.Move;
 public class MoveMenu extends JScrollPane {
 
     public Box box = new Box(BoxLayout.Y_AXIS);
-    private int turnCount = 1;
-    private Dimension size = new Dimension(130, 0);
+    public int turnCount = 1;
+    public Dimension size = new Dimension(140, 0);
     
     public MoveMenu() {
         super();
@@ -30,8 +30,35 @@ public class MoveMenu extends JScrollPane {
 
     public void addMove(Move move) {
         box.add(Box.createRigidArea(new Dimension(0, 2))); // space between items
-        JLabel lbl = new JLabel(" Turn " + turnCount++ + ": " + move.toString() + " (" + (turnCount % 2 == 0 ? "W" : "B") +")");
+        MoveLabel lbl = new MoveLabel(" Turn " + turnCount++ + ": " + move.toString() +
+                                      " (" + (turnCount % 2 == 0 ? "W" : "B") +")", move);
         box.add(lbl);
         size.height = Math.min(box.getComponentCount() / 2 * (lbl.getPreferredSize().height + 2), 200);
+    }
+
+    public void clear() {
+        box.removeAll();
+        turnCount = 1;
+        size.height = 0;
+    }
+
+    public Move undo() {
+        int count = box.getComponentCount();
+        if (count == 0) return null;
+        MoveLabel lbl = (MoveLabel)box.getComponent(count - 1);
+        box.remove(lbl);
+        box.remove(count - 2);
+        turnCount--;
+        size.height = Math.min(box.getComponentCount() / 2 * (lbl.getPreferredSize().height + 2), 200);
+        return lbl.move;
+    }
+
+    private static class MoveLabel extends JLabel {
+        public Move move;
+
+        public MoveLabel(String text, Move move) {
+            super(text);
+            this.move = move;
+        }
     }
 }

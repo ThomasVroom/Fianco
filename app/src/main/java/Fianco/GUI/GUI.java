@@ -24,11 +24,12 @@ public class GUI extends JFrame {
     public static final int HEIGHT = 620;
 
     public Grid grid;
-
     public MoveMenu movesMenuScroll;
+
+    public boolean restart = false;
+    public boolean undo = false;
     
     public GUI() {
-        this.setTitle("Fianco");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -37,14 +38,9 @@ public class GUI extends JFrame {
         JMenu optionsMenu = new JMenu("Options");
         JMenuItem newGame = new JMenuItem("New Game");
         newGame.addActionListener(e -> {
-            // TODO
+            this.restart = true;
         });
         optionsMenu.add(newGame);
-        JMenuItem loadGame = new JMenuItem("Load Game");
-        loadGame.addActionListener(e -> {
-            // TODO
-        });
-        optionsMenu.add(loadGame);
         JMenuItem exit = new JMenuItem("Exit");
         exit.addActionListener(e -> System.exit(0));
         optionsMenu.add(exit);
@@ -74,7 +70,7 @@ public class GUI extends JFrame {
         JMenu movesMenu = new JMenu("Moves");
         JMenuItem undo = new JMenuItem("Undo");
         undo.addActionListener(e -> {
-            // TODO
+            this.undo = true;
         });
         movesMenu.add(undo);
         movesMenu.addSeparator();
@@ -129,7 +125,7 @@ public class GUI extends JFrame {
         grid.repaint();
 
         // wait for the user to make a move
-        while (grid.target == -1) {
+        while (grid.target == -1 && !this.restart && !this.undo) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -137,7 +133,10 @@ public class GUI extends JFrame {
             }
         }
 
-        Move move = new Move((byte)grid.selected, (byte)grid.target, Math.abs(grid.target - grid.selected) > 9);
+        Move move;
+        if (this.restart) move = null;
+        else if (this.undo) move = movesMenuScroll.undo();
+        else move = new Move((byte)grid.selected, (byte)grid.target, Math.abs(grid.target - grid.selected) > 9);
 
         // reset util variables
         grid.cursor[0] = -1;
@@ -146,6 +145,8 @@ public class GUI extends JFrame {
         grid.target = -1;
         grid.allowMove = false;
         grid.legalMoves = null;
+        this.restart = false;
+        // this.undo = false; // handled in InputController
 
         return move;
     }

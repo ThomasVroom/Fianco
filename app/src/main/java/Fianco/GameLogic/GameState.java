@@ -80,7 +80,23 @@ public class GameState {
         this.turnIsP1 = !this.turnIsP1;
     }
 
-    // returns a bitset of legal moves for the current player
+    public void undo(Move move) {
+        if (move == null) return;
+        SortedSet<Byte> pieces = this.turnIsP1 ? this.p2Pieces : this.p1Pieces;
+
+        pieces.remove(move.to);
+        pieces.add(move.from);
+
+        if (move.isCapture) {
+            SortedSet<Byte> opponent = this.turnIsP1 ? this.p1Pieces : this.p2Pieces;
+            byte target = (byte)((move.from + move.to) / 2);
+            opponent.add(target);
+        }
+
+        this.turnIsP1 = !this.turnIsP1;
+    }
+
+    // returns a list of legal moves for the current player
     public List<Move> computeLegalMoves() {
         List<Move> legalMoves = new ArrayList<Move>(15);
         SortedSet<Byte> positions = this.turnIsP1 ? this.p1Pieces : this.p2Pieces;
@@ -129,6 +145,7 @@ public class GameState {
             }
         }
 
+        // capture is mandatory
         if (!legalMoves.isEmpty()) return legalMoves;
 
         for (byte position : positions) {

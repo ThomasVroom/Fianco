@@ -6,5 +6,4 @@ build
 
 # other folders
 app/bin/
-movestack/
 .vscode/

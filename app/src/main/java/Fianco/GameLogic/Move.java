@@ -19,10 +19,6 @@ public class Move {
         this.isCapture = isCapture;
     }
 
-    public Move inverse() {
-        return new Move(to, from, isCapture);
-    }
-
     @Override
     public String toString() {
         return "" + toAlgebraic(from) + (isCapture ? 'x' : '-') + toAlgebraic(to);

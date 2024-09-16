@@ -31,27 +31,46 @@ public class Engine implements Runnable {
         while (!(this.state.p1Wins() || this.state.p2Wins())) {
             InputController.refreshGUI(this.state);
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             legalMoves = this.state.computeLegalMoves();
-            System.out.print("\033\143"); // clear terminal
-            System.out.println("Turn: " + (this.state.turnIsP1 ? "White" : "Black"));
             move = (this.state.turnIsP1 ? p1 : p2).getMove(this.state, legalMoves);
-            this.step(move);
+            if (InputController.undo) { // undo
+                this.state.undo(move);
+                this.state.undo(InputController.undoBuffer);
+                InputController.undo = false;
+            }
+            else if (move == null) { // restart
+                this.state = GameState.initialState();
+                InputController.resetGUI();
+            }
+            else this.step(move);
+            System.gc(); // garbage collection
         }
 
         // declare winner
         InputController.refreshGUI(this.state);
         if (this.state.p1Wins()) {
             System.out.println("White wins!");
-            return;
         }
-        if (this.state.p2Wins()) {
+        else if (this.state.p2Wins()) {
             System.out.println("Black wins!");
-            return;
         }
+
+        // wait for restart
+        while (!InputController.gui.restart) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        InputController.gui.restart = false;
+        InputController.resetGUI();
+        Thread game = new Thread(new Engine(p1.playerType, p2.playerType));
+        game.start();
     }
 
     public void step(Move move) {
