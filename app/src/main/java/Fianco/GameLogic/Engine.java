@@ -24,18 +24,17 @@ public class Engine implements Runnable {
 
     @Override
     public void run() {
-        List<Move> legalMoves;
+        List<Move> legalMoves = this.state.computeLegalMoves();
         Move move;
 
         // main game loop
-        while (!(this.state.p1Wins() || this.state.p2Wins())) {
+        while (!(this.state.opponentWins(legalMoves) || this.state.currentWins())) {
             InputController.refreshGUI(this.state);
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            legalMoves = this.state.computeLegalMoves();
             move = (this.state.turnIsP1 ? p1 : p2).getMove(this.state, legalMoves);
             if (InputController.undo) { // undo
                 this.state.undo(move);
@@ -47,16 +46,19 @@ public class Engine implements Runnable {
                 InputController.resetGUI();
             }
             else this.step(move);
+            legalMoves = this.state.computeLegalMoves();
             System.gc(); // garbage collection
         }
 
         // declare winner
         InputController.refreshGUI(this.state);
-        if (this.state.p1Wins()) {
-            System.out.println("White wins!");
+        if (this.state.opponentWins(legalMoves)) {
+            if(this.state.turnIsP1) System.out.println("Black wins!");
+            else System.out.println("White wins!");
         }
-        else if (this.state.p2Wins()) {
-            System.out.println("Black wins!");
+        else {
+            if(this.state.turnIsP1) System.out.println("White wins!");
+            else System.out.println("Black wins!");
         }
 
         // wait for restart

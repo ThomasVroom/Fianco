@@ -55,14 +55,15 @@ public class GameState {
         return s;
     }
 
-    public boolean p1Wins() {
-        if (this.p2Pieces.isEmpty()) return true;
-        return this.p1Pieces.first() < 9;
+    public boolean currentWins() {
+        if ((this.turnIsP1 ? this.p2Pieces : this.p1Pieces).isEmpty()) return true;
+        return this.turnIsP1 ? this.p1Pieces.first() < 9 : this.p2Pieces.last() >= 72;
     }
 
-    public boolean p2Wins() {
-        if (this.p1Pieces.isEmpty()) return true;
-        return this.p2Pieces.last() >= 72;
+    public boolean opponentWins(List<Move> legalMoves) {
+        if (legalMoves.isEmpty()) return true;
+        if ((this.turnIsP1 ? this.p1Pieces : this.p2Pieces).isEmpty()) return true;
+        return this.turnIsP1 ? this.p2Pieces.last() >= 72 : this.p1Pieces.first() < 9;
     }
 
     public void step(Move move) {
