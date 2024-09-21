@@ -1,7 +1,5 @@
 package Fianco.GameLogic;
 
-import java.util.List;
-
 import Fianco.AI.*;
 import Fianco.GUI.GUI;
 
@@ -11,7 +9,9 @@ public class InputController {
     
     public static enum PlayerType {
         HUMAN,
-        RANDOM
+        RANDOM,
+        MINIMAX,
+        NEGAMAX
     }
 
     public static boolean undo = false;
@@ -30,15 +30,18 @@ public class InputController {
                 } break;
             }
             case RANDOM: agent = new RandomAgent(); break;
+            case MINIMAX: agent = new MiniMax(); break;
+            case NEGAMAX: agent = new NegaMax(); break;
         }
         this.playerType = playerType;
     }
 
-    public Move getMove(GameState state, List<Move> legalMoves) {
+    public Move getMove(GameState state) {
         Move move = null;
+        long startTime = System.currentTimeMillis();
         if (this.playerType == PlayerType.HUMAN) {
             do {
-                gui.showLegalMoves(legalMoves);
+                gui.showLegalMoves(state.legalMoves);
                 move = gui.getMove();
                 if (gui.undo) { // undo
                     undo = true;
@@ -47,16 +50,20 @@ public class InputController {
                     break;
                 }
                 if (move == null) break; // restart
-            } while (!legalMoves.contains(move));
+            } while (!state.legalMoves.contains(move));
             return move;
         }
-        return this.agent.getMove(state, legalMoves);
+        move = this.agent.getMove(state);
+        System.out.println("Computed move in " + (System.currentTimeMillis() - startTime) + "ms");
+        return move;
     }
 
     public static void refreshGUI(GameState state) {
         if (gui != null) {
             gui.updateGameState(state);
-            gui.setTitle("Fianco | Turn " + gui.movesMenuScroll.turnCount + ": " + (state.turnIsP1 ? "White" : "Black"));
+            gui.setTitle("Fianco  |  Turn " + gui.movesMenuScroll.turnCount + ": " +
+                        (state.turnIsP1 ? "White" : "Black") + "  |  " +
+                        ("Global Score: " + Eval.getGlobalScore(state, 0)));
             gui.grid.repaint();
         }
     }

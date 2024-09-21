@@ -9,3 +9,7 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
 - All basic requirements = 6, everything else is bonus (especially transposition table).
 - Experiments and plots are recommended.
 - Mention failed experiments (bitboards, etc.)
+
+- Contempt factor (chess wiki)
+- integrated timer?
+- quiescence search, modify to account for capturing sequences
