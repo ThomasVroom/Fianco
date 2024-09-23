@@ -22,12 +22,38 @@ public class GameState {
         GameState s = new GameState();
 
         s.p1Pieces = new TreeSet<Byte>();
-        s.p1Pieces.add((byte)49);
+        s.p1Pieces.add((byte)72);
+        s.p1Pieces.add((byte)73);
+        s.p1Pieces.add((byte)74);
+        s.p1Pieces.add((byte)75);
+        s.p1Pieces.add((byte)76);
+        s.p1Pieces.add((byte)77);
+        s.p1Pieces.add((byte)78);
+        s.p1Pieces.add((byte)79);
         s.p1Pieces.add((byte)80);
+        s.p1Pieces.add((byte)64);
+        s.p1Pieces.add((byte)70);
+        s.p1Pieces.add((byte)56);
+        s.p1Pieces.add((byte)60);
+        s.p1Pieces.add((byte)48);
+        s.p1Pieces.add((byte)50);
 
         s.p2Pieces = new TreeSet<Byte>();
-        s.p2Pieces.add((byte)31);
         s.p2Pieces.add((byte)0);
+        s.p2Pieces.add((byte)1);
+        s.p2Pieces.add((byte)2);
+        s.p2Pieces.add((byte)3);
+        s.p2Pieces.add((byte)4);
+        s.p2Pieces.add((byte)5);
+        s.p2Pieces.add((byte)6);
+        s.p2Pieces.add((byte)7);
+        s.p2Pieces.add((byte)8);
+        s.p2Pieces.add((byte)10);
+        s.p2Pieces.add((byte)16);
+        s.p2Pieces.add((byte)20);
+        s.p2Pieces.add((byte)24);
+        s.p2Pieces.add((byte)30);
+        s.p2Pieces.add((byte)32);
 
         s.turnIsP1 = true;
         s.computeLegalMoves();

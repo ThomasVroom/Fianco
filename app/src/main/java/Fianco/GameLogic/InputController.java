@@ -1,6 +1,7 @@
 package Fianco.GameLogic;
 
 import Fianco.AI.*;
+import Fianco.AI.util.Eval;
 import Fianco.GUI.GUI;
 
 public class InputController {
@@ -10,8 +11,8 @@ public class InputController {
     public static enum PlayerType {
         HUMAN,
         RANDOM,
-        MINIMAX,
-        NEGAMAX
+        NEGAMAX,
+        NEGAMAXID
     }
 
     public static boolean undo = false;
@@ -30,8 +31,8 @@ public class InputController {
                 } break;
             }
             case RANDOM: agent = new RandomAgent(); break;
-            case MINIMAX: agent = new MiniMax(); break;
             case NEGAMAX: agent = new NegaMax(); break;
+            case NEGAMAXID: agent = new NegaMaxID(); break;
         }
         this.playerType = playerType;
     }
