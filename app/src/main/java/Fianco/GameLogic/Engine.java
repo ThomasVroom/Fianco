@@ -43,7 +43,6 @@ public class Engine implements Runnable {
                 InputController.resetGUI();
             }
             else this.step(move);
-            System.gc(); // garbage collection
         }
 
         // declare winner

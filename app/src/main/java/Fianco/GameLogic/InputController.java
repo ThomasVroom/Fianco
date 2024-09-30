@@ -23,13 +23,12 @@ public class InputController {
     public Agent agent;
 
     public InputController(PlayerType playerType) {
+        if (gui == null) {
+            gui = new GUI();
+            gui.setVisible(true);
+        }
         switch (playerType) {
-            case HUMAN: {
-                if (gui == null) {
-                    gui = new GUI();
-                    gui.setVisible(true);
-                } break;
-            }
+            case HUMAN: break;
             case RANDOM: agent = new RandomAgent(); break;
             case NEGAMAX: agent = new NegaMax(); break;
             case NEGAMAXID: agent = new NegaMaxID(); break;
