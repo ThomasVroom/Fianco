@@ -4,5 +4,5 @@ import Fianco.GameLogic.GameState;
 import Fianco.GameLogic.Move;
 
 public interface Agent {
-    public Move getMove(GameState state);
+    public Move getMove(GameState state, int timeLimit);
 }

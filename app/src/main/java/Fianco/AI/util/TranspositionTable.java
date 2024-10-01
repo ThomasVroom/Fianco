@@ -12,7 +12,7 @@ public class TranspositionTable {
     }
 
     // number of bits to use for the primary hash
-    public static final byte HASH_BITS = 22;
+    public static final byte HASH_BITS = 20;
     public static final int HASH_SIZE = 1 << HASH_BITS;
 
     // zobrist key generation
@@ -44,8 +44,9 @@ public class TranspositionTable {
     // replacement scheme: always replace
     public void store(GameState state, short value, Flag flag, Move bestMove, byte depth) {
         long hash = getHash(state);
-        int primary = (int)((hash >>> (63 - HASH_BITS)) % HASH_SIZE);
-        this.table[primary] = new Entry(value, flag, bestMove, depth, hash << (HASH_BITS + 1));
+        this.table[(int)((hash >>> (63 - HASH_BITS)) % HASH_SIZE)] = new Entry(
+            value, flag, bestMove, depth, hash << (HASH_BITS + 1)
+        );
     }
 
     public long getHash(GameState state) {

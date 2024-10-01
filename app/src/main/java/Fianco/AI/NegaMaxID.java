@@ -1,7 +1,5 @@
 package Fianco.AI;
 
-import java.util.Comparator;
-
 import Fianco.AI.util.Eval;
 import Fianco.AI.util.TranspositionTable;
 import Fianco.AI.util.TranspositionTable.Entry;
@@ -14,14 +12,16 @@ public class NegaMaxID implements Agent {
     public static TranspositionTable tt = new TranspositionTable();
 
     public static byte DEPTH;
-    public static final int DELTA = 6;
-
-    private MoveComparator moveComparator = new MoveComparator();
+    public static final int DELTA = 4;
 
     @Override
-    public Move getMove(GameState state) {
+    public Move getMove(GameState state, int timeLimit) {
+        // if there is only one legal move, return it
+        if (state.legalMoves.size() == 1) return state.legalMoves.get(0);
+
+        long startTime = System.currentTimeMillis();
         int guess = 0; // aspiration search
-        for (DEPTH = 1; DEPTH <= 9; DEPTH++) {
+        for (DEPTH = 1; System.currentTimeMillis() - startTime < timeLimit; DEPTH++) {
             int score = negamax(state, DEPTH, guess - DELTA, guess + DELTA);
             if (score >= guess + DELTA) { // fail high
                 System.out.println("\u001B[31mFail high (" + score + ">=" + guess + ") at depth " + DEPTH + "\u001B[0m");
@@ -32,9 +32,14 @@ public class NegaMaxID implements Agent {
                 score = negamax(state, DEPTH, Eval.MIN_VALUE, score);
             }
             guess = score;
+
+            // early exit if we have a winning move
+            if (Eval.scoreIsWin(score, state.turnIsP1)) {
+                break;
+            }
         }
         Move bestMove = tt.retrieve(state).bestMove;
-        System.out.println("Selected move: " + bestMove + " with score: " + guess);
+        System.out.println("Selected move: " + bestMove + " with score: " + guess + " at depth " + DEPTH);
         return bestMove;
     }
 
@@ -58,11 +63,10 @@ public class NegaMaxID implements Agent {
         }
 
         if (depth == 0 || s.p1Win || s.p2Win) { // maximum depth or terminal state
-            return (short)((s.turnIsP1 ? 1 : -1) * Eval.getInfluencedScore(s, depth));
+            return (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, depth));
         }
 
-        // sort moves
-        s.legalMoves.sort(moveComparator);
+        // try the tt move first
         if (n != null && n.bestMove != null) {
             s.legalMoves.add(0, n.bestMove);
         }
@@ -85,18 +89,5 @@ public class NegaMaxID implements Agent {
         Flag flag = score <= oldAlpha ? Flag.UPPERBOUND : (score >= beta ? Flag.LOWERBOUND : Flag.EXACT);
         tt.store(s, score, flag, bestMove, depth);
         return score;
-    }
-
-    private class MoveComparator implements Comparator<Move> {
-        @Override
-        public int compare(Move a, Move b) { // sort moves by captures first
-            if (a.isCapture && !b.isCapture) {
-                return -1;
-            } else if (!a.isCapture && b.isCapture) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
     }
 }
