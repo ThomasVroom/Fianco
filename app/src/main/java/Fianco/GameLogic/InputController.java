@@ -2,7 +2,6 @@ package Fianco.GameLogic;
 
 import Fianco.AI.*;
 import Fianco.AI.util.Eval;
-import Fianco.AI.util.TimeScheduler;
 import Fianco.GUI.GUI;
 
 public class InputController {
@@ -13,15 +12,14 @@ public class InputController {
         HUMAN,
         RANDOM,
         NEGAMAX,
-        NEGAMAXID
+        NEGAMAXID,
+        NEGAMAXPLUS
     }
 
     public static boolean undo = false;
     public static Move undoBuffer = null;
 
     public PlayerType playerType;
-
-    public TimeScheduler timeScheduler;
 
     public Agent agent;
 
@@ -35,9 +33,9 @@ public class InputController {
             case RANDOM: agent = new RandomAgent(); break;
             case NEGAMAX: agent = new NegaMax(); break;
             case NEGAMAXID: agent = new NegaMaxID(); break;
+            case NEGAMAXPLUS: agent = new NegaMaxPlus(); break;
         }
         this.playerType = playerType;
-        this.timeScheduler = new TimeScheduler();
     }
 
     public Move getMove(GameState state) {
@@ -57,7 +55,7 @@ public class InputController {
             } while (!state.legalMoves.contains(move));
             return move;
         }
-        move = this.agent.getMove(state, this.timeScheduler.timeForMove(gui.movesMenuScroll.turnCount - 1));
+        move = this.agent.getMove(state);
         System.out.println("Computed move in " + (System.currentTimeMillis() - startTime) + "ms");
         return move;
     }

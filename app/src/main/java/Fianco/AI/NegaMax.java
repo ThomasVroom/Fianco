@@ -9,7 +9,7 @@ public class NegaMax implements Agent {
     public static final int DEPTH = 8;
 
     @Override
-    public Move getMove(GameState state, int timeLimit) {
+    public Move getMove(GameState state) {
         if (state.legalMoves.size() == 1) return state.legalMoves.get(0);
         int score = negamax(state, DEPTH, Eval.MIN_VALUE, Eval.MAX_VALUE);
         System.out.println("Selected move: " + this.bestMove + " with score: " + score);

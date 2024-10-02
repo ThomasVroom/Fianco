@@ -7,7 +7,7 @@ import Fianco.AI.util.TranspositionTable.Flag;
 import Fianco.GameLogic.GameState;
 import Fianco.GameLogic.Move;
 
-public class NegaMaxID implements Agent {
+public class NegaMaxPlus implements Agent {
 
     public static final int DELTA = 4;
     public static final int TARGET_TIME = 5000;
