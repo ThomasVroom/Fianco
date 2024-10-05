@@ -24,6 +24,7 @@ public class NegaMax implements Agent {
         }
 
         int score = Integer.MIN_VALUE, value;
+        if (s.legalMoves == null) s.computeLegalMoves();
         for (Move m : s.legalMoves) {
             value = -negamax(s.deepStep(m), depth - 1, -beta, -alpha);
             if (value > score) {

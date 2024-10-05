@@ -1,6 +1,7 @@
 package Fianco.AI;
 
 import Fianco.AI.util.Eval;
+import Fianco.AI.util.KillerMoves;
 import Fianco.AI.util.TranspositionTable;
 import Fianco.AI.util.TranspositionTable.Entry;
 import Fianco.AI.util.TranspositionTable.Flag;
@@ -14,6 +15,7 @@ public class NegaMaxPlus implements Agent {
     public static final int MAX_DEPTH = 64;
 
     public TranspositionTable tt = new TranspositionTable();
+    public KillerMoves killerMoves = new KillerMoves(MAX_DEPTH);
 
     public byte DEPTH;
     public int moveCounter;
@@ -91,27 +93,64 @@ public class NegaMaxPlus implements Agent {
             return (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, depth));
         }
 
-        // try the tt move first
-        if (n != null && n.bestMove != null) {
-            s.legalMoves.add(0, n.bestMove);
-        }
-
+        // negamax search
         short score = Short.MIN_VALUE, value;
         Move bestMove = null;
-        for (Move m : s.legalMoves) {
-            if (depth == this.DEPTH) this.moveCounter++; // for printing
-            value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
+
+        // try the tt move first
+        if (n != null && n.bestMove != null) {
+            value = (short)-negamax(s.deepStep(n.bestMove), (byte)(depth - 1), -beta, -alpha);
             if (value > score) {
                 score = value;
-                bestMove = m;
+                bestMove = n.bestMove;
             }
             alpha = Math.max(alpha, score);
-            if (score >= beta) {
-                break; // beta cutoff
-            }
             if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
-                this.timeOut = true;
-                break; // time is up
+                this.timeOut = true; // time is up
+            }
+        }
+
+        // try the killer moves
+        if (score < beta && !this.timeOut) {
+            if (s.legalMoves == null) s.computeLegalMoves();
+            for (Move m : this.killerMoves.getKillerMoves(depth)) {
+                if (m == null) break; // no more killer moves
+                if (!s.legalMoves.contains(m)) continue; // not a legal move
+                value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
+                if (value > score) {
+                    score = value;
+                    bestMove = m;
+                }
+                alpha = Math.max(alpha, score);
+                if (score >= beta) { // beta cutoff
+                    break;
+                }
+                if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
+                    this.timeOut = true;
+                    break; // time is up
+                }
+            }
+        }
+
+        // try all other moves
+        if (score < beta && !this.timeOut) {
+            for (Move m : s.legalMoves) {
+                if (depth == this.DEPTH) this.moveCounter++; // for printing
+                value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
+                if (value > score) {
+                    score = value;
+                    bestMove = m;
+                }
+                alpha = Math.max(alpha, score);
+                if (score >= beta) { // beta cutoff
+                    // store killer move
+                    if (!m.isCapture) this.killerMoves.addKillerMove(depth, m);
+                    break;
+                }
+                if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
+                    this.timeOut = true;
+                    break; // time is up
+                }
             }
         }
 

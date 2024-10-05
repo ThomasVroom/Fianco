@@ -25,6 +25,6 @@ public class Eval {
         int distanceP2 = 8 - state.p2Pieces.last() / 9;
 
         // calculate the score
-        return 3 * material + (distanceP2 - distanceP1);
+        return 5 * material + (distanceP2 - distanceP1);
     }
 }

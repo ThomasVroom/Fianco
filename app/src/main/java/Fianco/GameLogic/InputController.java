@@ -40,6 +40,7 @@ public class InputController {
 
     public Move getMove(GameState state) {
         Move move = null;
+        state.computeLegalMoves();
         long startTime = System.currentTimeMillis();
         if (this.playerType == PlayerType.HUMAN) {
             do {

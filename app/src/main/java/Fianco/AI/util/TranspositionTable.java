@@ -16,7 +16,7 @@ public class TranspositionTable {
     public static final int HASH_SIZE = 1 << HASH_BITS;
 
     // zobrist key generation
-    public static final SplittableRandom random = new SplittableRandom();
+    public static final SplittableRandom random = new SplittableRandom(0);
     public final long[][] zobristKeys = new long[81][2];
     public final long zobristKeyTurn = random.nextLong();
 

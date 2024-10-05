@@ -92,6 +92,7 @@ public class NegaMaxID implements Agent {
         }
 
         // try the tt move first
+        if (s.legalMoves == null) s.computeLegalMoves();
         if (n != null && n.bestMove != null) {
             s.legalMoves.add(0, n.bestMove);
         }

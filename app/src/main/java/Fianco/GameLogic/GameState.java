@@ -56,7 +56,6 @@ public class GameState {
         s.p2Pieces.add((byte)32);
 
         s.turnIsP1 = true;
-        s.computeLegalMoves();
 
         return s;
     }
@@ -84,7 +83,7 @@ public class GameState {
             return;
         }
 
-        this.computeLegalMoves();
+        this.legalMoves = null;
     }
 
     // performs a step and returns a new state
@@ -118,11 +117,11 @@ public class GameState {
         this.turnIsP1 = !this.turnIsP1;
         this.p1Win = false;
         this.p2Win = false;
-        this.computeLegalMoves();
+        this.legalMoves = null;
     }
 
     // computes a list of legal moves for the current player
-    private void computeLegalMoves() {
+    public void computeLegalMoves() {
         this.legalMoves = new ArrayList<Move>(15);
         SortedSet<Byte> positions = this.turnIsP1 ? this.p1Pieces : this.p2Pieces;
         SortedSet<Byte> opponent = this.turnIsP1 ? this.p2Pieces : this.p1Pieces;
