@@ -11,7 +11,7 @@ import Fianco.GameLogic.Move;
 
 public class NegaMaxPlus implements Agent {
 
-    public static final int DELTA = 7;
+    public static final int DELTA = 5;
     public static final int TARGET_TIME = 5000;
     public static final int MAX_DEPTH = 64;
 
@@ -91,8 +91,11 @@ public class NegaMaxPlus implements Agent {
         }
 
         // maximum depth or terminal state
-        if (depth == 0 || s.p1Win || s.p2Win) {
+        if (s.p1Win || s.p2Win) { // terminal state
             return (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, depth));
+        }
+        if (depth == 0) { // maximum depth -> quiescence search
+            return quiescenceSearch(s, -beta, -alpha);
         }
 
         // negamax search
@@ -171,6 +174,20 @@ public class NegaMaxPlus implements Agent {
         // store the result in the transposition table
         Flag flag = score <= oldAlpha ? Flag.UPPERBOUND : (score >= beta ? Flag.LOWERBOUND : Flag.EXACT);
         if (depth == this.DEPTH || !this.timeOut) this.tt.store(s, score, flag, bestMove, depth);
+        return score;
+    }
+
+    public short quiescenceSearch(GameState s, int alpha, int beta) {
+        short score = (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, 0));
+        if (score >= beta) return score;
+        if (score > alpha) alpha = score;
+        if (s.legalMoves == null) s.computeLegalMoves();
+        for (Move m : s.legalMoves) {
+            if (!m.isCapture) break; // only consider captures
+            score = (short)-quiescenceSearch(s.deepStep(m), -beta, -alpha);
+            if (score >= beta) break;
+            if (score > alpha) alpha = score;
+        }
         return score;
     }
 }

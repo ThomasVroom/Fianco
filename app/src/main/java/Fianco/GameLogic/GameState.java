@@ -119,7 +119,7 @@ public class GameState {
 
     // computes a list of legal moves for the current player
     public void computeLegalMoves() {
-        this.legalMoves = new ArrayList<Move>(15);
+        this.legalMoves = new ArrayList<Move>(20);
         SortedSet<Byte> positions = this.turnIsP1 ? this.p1Pieces : this.p2Pieces;
         SortedSet<Byte> opponent = this.turnIsP1 ? this.p2Pieces : this.p1Pieces;
         byte target, capture_target;
