@@ -136,7 +136,7 @@ public class GUI extends JFrame {
         Move move;
         if (this.restart) move = null;
         else if (this.undo) move = movesMenuScroll.undo();
-        else move = new Move((byte)grid.selected, (byte)grid.target, Math.abs(grid.target - grid.selected) > 9);
+        else move = Move.getMove((byte)grid.selected, (byte)grid.target, Math.abs(grid.target - grid.selected) > 9);
 
         // reset util variables
         grid.cursor[0] = -1;

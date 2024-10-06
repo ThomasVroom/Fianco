@@ -1,6 +1,7 @@
 package Fianco.AI;
 
 import Fianco.AI.util.Eval;
+import Fianco.AI.util.HistoryHeuristic;
 import Fianco.AI.util.KillerMoves;
 import Fianco.AI.util.TranspositionTable;
 import Fianco.AI.util.TranspositionTable.Entry;
@@ -10,12 +11,13 @@ import Fianco.GameLogic.Move;
 
 public class NegaMaxPlus implements Agent {
 
-    public static final int DELTA = 4;
+    public static final int DELTA = 7;
     public static final int TARGET_TIME = 5000;
     public static final int MAX_DEPTH = 64;
 
     public TranspositionTable tt = new TranspositionTable();
     public KillerMoves killerMoves = new KillerMoves(MAX_DEPTH);
+    public HistoryHeuristic hh = new HistoryHeuristic();
 
     public byte DEPTH;
     public int moveCounter;
@@ -64,7 +66,7 @@ public class NegaMaxPlus implements Agent {
         }
         Move bestMove = tt.retrieve(state).bestMove;
         System.out.println("(" + (state.turnIsP1 ? "W" : "B") + ") Selected move: " + bestMove + " with score: " + guess +
-                            " at depth " + DEPTH + " (" + moveCounter + "/" + state.legalMoves.size() + ")");
+                            " at depth " + DEPTH + " (~" + moveCounter + "/" + state.legalMoves.size() + ")");
         return bestMove;
     }
 
@@ -105,6 +107,9 @@ public class NegaMaxPlus implements Agent {
                 bestMove = n.bestMove;
             }
             alpha = Math.max(alpha, score);
+            if (score >= beta) { // beta cutoff
+                if (!n.bestMove.isCapture) this.hh.updateHistoryScore(n.bestMove);
+            }
             if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
                 this.timeOut = true; // time is up
             }
@@ -113,16 +118,19 @@ public class NegaMaxPlus implements Agent {
         // try the killer moves
         if (score < beta && !this.timeOut) {
             if (s.legalMoves == null) s.computeLegalMoves();
-            for (Move m : this.killerMoves.getKillerMoves(depth)) {
-                if (m == null) break; // no more killer moves
-                if (!s.legalMoves.contains(m)) continue; // not a legal move
-                value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
+            if (n != null && n.bestMove != null) s.legalMoves.remove(n.bestMove);
+            for (Move km : this.killerMoves.getKillerMoves(depth)) {
+                if (km == null) break; // no more killer moves
+                if (!s.legalMoves.contains(km)) continue; // not a legal move
+                s.legalMoves.remove(km);
+                value = (short)-negamax(s.deepStep(km), (byte)(depth - 1), -beta, -alpha);
                 if (value > score) {
                     score = value;
-                    bestMove = m;
+                    bestMove = km;
                 }
                 alpha = Math.max(alpha, score);
                 if (score >= beta) { // beta cutoff
+                    this.hh.updateHistoryScore(km);
                     break;
                 }
                 if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
@@ -134,6 +142,9 @@ public class NegaMaxPlus implements Agent {
 
         // try all other moves
         if (score < beta && !this.timeOut) {
+            // sort by history heuristic
+            s.legalMoves.sort(this.hh.COMPARATOR);
+
             for (Move m : s.legalMoves) {
                 if (depth == this.DEPTH) this.moveCounter++; // for printing
                 value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
@@ -143,8 +154,11 @@ public class NegaMaxPlus implements Agent {
                 }
                 alpha = Math.max(alpha, score);
                 if (score >= beta) { // beta cutoff
-                    // store killer move
-                    if (!m.isCapture) this.killerMoves.addKillerMove(depth, m);
+                    // update heuristics
+                    if (!m.isCapture) {
+                        this.killerMoves.addKillerMove(depth, m);
+                        this.hh.updateHistoryScore(m);
+                    }
                     break;
                 }
                 if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {

@@ -68,19 +68,16 @@ public class GameState {
 
         if (move.isCapture) {
             SortedSet<Byte> opponent = this.turnIsP1 ? this.p2Pieces : this.p1Pieces;
-            byte target = (byte)((move.from + move.to) / 2);
-            opponent.remove(target);
+            opponent.remove((byte)((move.from + move.to) / 2));
         }
 
         this.turnIsP1 = !this.turnIsP1;
 
         if (!this.p1Pieces.isEmpty() && (this.p1Pieces.first() < 9 || this.p2Pieces.isEmpty())) {
             this.p1Win = true;
-            return;
         }
         else if (this.p2Pieces.last() >= 72 || this.p1Pieces.isEmpty()) {
             this.p2Win = true;
-            return;
         }
 
         this.legalMoves = null;
@@ -135,7 +132,7 @@ public class GameState {
                     target = (byte)(position - 20);
                     capture_target = (byte)(position - 10);
                     if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
-                        this.legalMoves.add(new Move(position, target, true));
+                        this.legalMoves.add(Move.getMove(position, target, true));
                     }
                 }
 
@@ -144,26 +141,26 @@ public class GameState {
                     target = (byte)(position - 16);
                     capture_target = (byte)(position - 8);
                     if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
-                        this.legalMoves.add(new Move(position, target, true));
+                        this.legalMoves.add(Move.getMove(position, target, true));
                     }
                 }
             }
             else {
                 // check left
-                if (position % 9 > 1 && position < 63) {
-                    target = (byte)(position + 16);
-                    capture_target = (byte)(position + 8);
-                    if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
-                        this.legalMoves.add(new Move(position, target, true));
-                    }
-                }
-
-                // check right
                 if (position % 9 < 7 && position < 63) {
                     target = (byte)(position + 20);
                     capture_target = (byte)(position + 10);
                     if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
-                        this.legalMoves.add(new Move(position, target, true));
+                        this.legalMoves.add(Move.getMove(position, target, true));
+                    }
+                }
+
+                // check right
+                if (position % 9 > 1 && position < 63) {
+                    target = (byte)(position + 16);
+                    capture_target = (byte)(position + 8);
+                    if (opponent.contains(capture_target) && !positions.contains(target) && !opponent.contains(target)) {
+                        this.legalMoves.add(Move.getMove(position, target, true));
                     }
                 }
             }
@@ -178,7 +175,7 @@ public class GameState {
                 if (position >= 9) {
                     target = (byte)(position - 9);
                     if (!positions.contains(target) && !opponent.contains(target)) {
-                        this.legalMoves.add(new Move(position, target, false));
+                        this.legalMoves.add(Move.getMove(position, target, false));
                     }
                 }
             }
@@ -186,7 +183,7 @@ public class GameState {
                 if (position < 72) {
                     target = (byte)(position + 9);
                     if (!positions.contains(target) && !opponent.contains(target)) {
-                        this.legalMoves.add(new Move(position, target, false));
+                        this.legalMoves.add(Move.getMove(position, target, false));
                     }
                 }
             }
@@ -195,7 +192,7 @@ public class GameState {
             if (position % 9 > 0) {
                 target = (byte)(position - 1);
                 if (!positions.contains(target) && !opponent.contains(target)) {
-                    this.legalMoves.add(new Move(position, target, false));
+                    this.legalMoves.add(Move.getMove(position, target, false));
                 }
             }
 
@@ -203,7 +200,7 @@ public class GameState {
             if (position % 9 < 8) {
                 target = (byte)(position + 1);
                 if (!positions.contains(target) && !opponent.contains(target)) {
-                    this.legalMoves.add(new Move(position, target, false));
+                    this.legalMoves.add(Move.getMove(position, target, false));
                 }
             }
         }
