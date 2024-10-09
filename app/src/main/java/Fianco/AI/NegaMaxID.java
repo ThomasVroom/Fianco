@@ -9,7 +9,7 @@ import Fianco.GameLogic.Move;
 
 public class NegaMaxID implements Agent {
 
-    public static final int DELTA = 5;
+    public static final int DELTA = 10;
     public static final int TARGET_TIME = 5000;
     public static final int MAX_DEPTH = 64;
 

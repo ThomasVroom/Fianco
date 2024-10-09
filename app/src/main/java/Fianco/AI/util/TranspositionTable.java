@@ -16,7 +16,7 @@ public class TranspositionTable {
     public static final int HASH_SIZE = 1 << HASH_BITS;
 
     // zobrist key generation
-    public static final SplittableRandom random = new SplittableRandom(0);
+    public static final SplittableRandom random = new SplittableRandom();
     public final long[][] zobristKeys = new long[81][2];
     public final long zobristKeyTurn = random.nextLong();
 
@@ -44,12 +44,13 @@ public class TranspositionTable {
     public void store(GameState state, short value, Flag flag, Move bestMove, byte depth) {
         long hash = getHash(state);
         int index = (int)((hash >>> (63 - HASH_BITS)) % HASH_SIZE);
+        long hashKey = hash << (HASH_BITS + 1);
         Entry entry = this.table[index];
-        if (entry != null && entry.depth > depth) {
+        if (entry != null && entry.depth > depth && entry.hashKey == hashKey) {
             return; // do not replace deeper entries
         }
         this.table[index] = new Entry(
-            value, flag, bestMove, depth, hash << (HASH_BITS + 1)
+            value, flag, bestMove, depth, hashKey
         );
     }
 

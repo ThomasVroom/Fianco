@@ -115,6 +115,7 @@ public class GUI extends JFrame {
     }
 
     public void updateGameState(GameState gameState) {
+        this.setVisible(true);
         this.grid.updateGameState(gameState);
         this.grid.repaint();
     }

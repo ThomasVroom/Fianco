@@ -9,7 +9,7 @@ import Fianco.AI.util.TranspositionTable.Flag;
 import Fianco.GameLogic.GameState;
 import Fianco.GameLogic.Move;
 
-public class NegaMaxPlus implements Agent {
+public class NegaMaxQS implements Agent {
 
     public static final int DELTA = 10;
     public static final int TARGET_TIME = 5000;
@@ -47,12 +47,10 @@ public class NegaMaxPlus implements Agent {
             int score = negamax(state, DEPTH, guess - DELTA, guess + DELTA);
             if (this.timeOut) break;
             if (score >= guess + DELTA) { // fail high
-                this.moveCounter = 0;
                 System.out.println("\u001B[31mFail high (" + score + ">=" + guess + ") at depth " + DEPTH + "\u001B[0m");
                 score = negamax(state, DEPTH, score, Eval.MAX_VALUE);
             }
             else if (score <= guess - DELTA) { // fail low
-                this.moveCounter = 0;
                 System.out.println("\u001B[31mFail low (" + score + "<=" + guess + ") at depth " + DEPTH + "\u001B[0m");
                 score = negamax(state, DEPTH, Eval.MIN_VALUE, score);
             }
@@ -91,8 +89,11 @@ public class NegaMaxPlus implements Agent {
         }
 
         // maximum depth or terminal state
-        if (depth == 0 || s.p1Win || s.p2Win) {
+        if (s.p1Win || s.p2Win) { // terminal state
             return (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, depth));
+        }
+        if (depth == 0) { // maximum depth -> quiescence search
+            return quiescenceSearch(s, -beta, -alpha);
         }
 
         // negamax search
@@ -101,7 +102,12 @@ public class NegaMaxPlus implements Agent {
 
         // try the tt move first
         if (n != null && n.bestMove != null) {
-            value = (short)-negamax(s.deepStep(n.bestMove), (byte)(depth - 1), -beta, -alpha);
+            if (n.bestMove.isCapture) {
+                value = (short)-negamax(s.deepStep(n.bestMove), depth, -beta, -alpha);
+            }
+            else {
+                value = (short)-negamax(s.deepStep(n.bestMove), (byte)(depth - 1), -beta, -alpha);
+            }
             if (value > score) {
                 score = value;
                 bestMove = n.bestMove;
@@ -147,7 +153,12 @@ public class NegaMaxPlus implements Agent {
 
             for (Move m : s.legalMoves) {
                 if (depth == this.DEPTH) this.moveCounter++; // for printing
-                value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
+                if (m.isCapture) {
+                    value = (short)-negamax(s.deepStep(m), depth, -beta, -alpha);
+                }
+                else {
+                    value = (short)-negamax(s.deepStep(m), (byte)(depth - 1), -beta, -alpha);
+                }
                 if (value > score) {
                     score = value;
                     bestMove = m;
@@ -170,7 +181,23 @@ public class NegaMaxPlus implements Agent {
 
         // store the result in the transposition table
         Flag flag = score <= oldAlpha ? Flag.UPPERBOUND : (score >= beta ? Flag.LOWERBOUND : Flag.EXACT);
-        if (depth == this.DEPTH || !this.timeOut) this.tt.store(s, score, flag, bestMove, depth);
+        if (depth == this.DEPTH || !this.timeOut) {
+            this.tt.store(s, score, flag, bestMove, depth);
+        }
+        return score;
+    }
+
+    public short quiescenceSearch(GameState s, int alpha, int beta) {
+        short score = (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, 0));
+        if (score >= beta) return score;
+        if (score > alpha) alpha = score;
+        s.computeLegalMoves();
+        for (Move m : s.legalMoves) {
+            if (!m.isCapture) break; // only consider captures
+            score = (short)-quiescenceSearch(s.deepStep(m), -beta, -alpha);
+            if (score >= beta) break;
+            if (score > alpha) alpha = score;
+        }
         return score;
     }
 }

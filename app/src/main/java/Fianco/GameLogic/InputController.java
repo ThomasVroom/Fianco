@@ -13,7 +13,8 @@ public class InputController {
         RANDOM,
         NEGAMAX,
         NEGAMAXID,
-        NEGAMAXPLUS
+        NEGAMAXPLUS,
+        NEGAMAXQS
     }
 
     public static boolean undo = false;
@@ -26,7 +27,6 @@ public class InputController {
     public InputController(PlayerType playerType) {
         if (gui == null) {
             gui = new GUI();
-            gui.setVisible(true);
         }
         switch (playerType) {
             case HUMAN: break;
@@ -34,6 +34,7 @@ public class InputController {
             case NEGAMAX: agent = new NegaMax(); break;
             case NEGAMAXID: agent = new NegaMaxID(); break;
             case NEGAMAXPLUS: agent = new NegaMaxPlus(); break;
+            case NEGAMAXQS: agent = new NegaMaxQS(); break;
         }
         this.playerType = playerType;
     }
