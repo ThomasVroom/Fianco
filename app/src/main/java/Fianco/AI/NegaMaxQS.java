@@ -41,16 +41,17 @@ public class NegaMaxQS implements Agent {
 
         // aspiration search
         int guess = (state.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(state, 0);
-        for (DEPTH = 1; !this.timeOut && DEPTH < MAX_DEPTH; DEPTH++) {
+        for (DEPTH = 1; DEPTH < MAX_DEPTH; DEPTH++) {
             this.timeCheckDepth = (int)(0.9f * DEPTH);
             this.moveCounter = 0;
             int score = negamax(state, DEPTH, guess - DELTA, guess + DELTA);
-            if (this.timeOut) break;
             if (score >= guess + DELTA) { // fail high
+                this.timeOut = false;
                 System.out.println("\u001B[31mFail high (" + score + ">=" + guess + ") at depth " + DEPTH + "\u001B[0m");
                 score = negamax(state, DEPTH, score, Eval.MAX_VALUE);
             }
             else if (score <= guess - DELTA) { // fail low
+                this.timeOut = false;
                 System.out.println("\u001B[31mFail low (" + score + "<=" + guess + ") at depth " + DEPTH + "\u001B[0m");
                 score = negamax(state, DEPTH, Eval.MIN_VALUE, score);
             }
@@ -61,7 +62,11 @@ public class NegaMaxQS implements Agent {
                 System.out.println("\u001B[32mEarly Termination: win in "+(DEPTH - Math.abs(score) + Eval.WIN_P1)+" moves\u001B[0m");
                 break;
             }
+
+            // check for a time out
+            if (this.timeOut) break;
         }
+
         Move bestMove = tt.retrieve(state).bestMove;
         System.out.println("(" + (state.turnIsP1 ? "W" : "B") + ") Selected move: " + bestMove + " with score: " + guess +
                             " at depth " + DEPTH + " (~" + moveCounter + "/" + (state.legalMoves.size() + 1) + ")");

@@ -6,6 +6,10 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
 - Experiments and plots are recommended.
 - Mention failed experiments (bitboards, etc.)
 
+- pass zobrist hash down as a parameter in negamax to skip having to recompute every call?
+- clear killer moves after every turn? might reduce the number of legality checks
+- check killer moves of previous depth?
+- PVS
 - null move (?)
  - not in root
  - not after capture
@@ -13,11 +17,11 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
  - not after previous null move (does that include switching sides?)
  - not too close to the leaf nodes (need time to correct a faulty null move)
 - multicut
-- endgame database (6 pieces ~6GB)
 - improve eval function
+- binary board + add/remove from one board instead of deepclone?
 - opening book
-- binary board + add/remove from one board instead of deepclone
 - optimize time alocation
+- PN search?
 
 |                        | NegaMax | NegaMaxID | NegaMaxPlus | NegaMaxQS |
 |------------------------|:-------:|:---------:|:-----------:|:---------:|
