@@ -14,6 +14,7 @@ public class NegaMaxPlus implements Agent {
     public static final int DELTA = 10;
     public static final int TARGET_TIME = 5000;
     public static final int MAX_DEPTH = 64;
+    public static final int MIN_DEPTH = 8;
 
     public TranspositionTable tt = new TranspositionTable();
     public KillerMoves killerMoves = new KillerMoves(MAX_DEPTH);
@@ -113,7 +114,8 @@ public class NegaMaxPlus implements Agent {
             if (score >= beta) { // beta cutoff
                 if (!n.bestMove.isCapture) this.hh.updateHistoryScore(n.bestMove);
             }
-            if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
+            if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
+                    && System.currentTimeMillis() - this.startTime > this.timeLimit) {
                 this.timeOut = true; // time is up
             }
         }
@@ -124,8 +126,7 @@ public class NegaMaxPlus implements Agent {
             if (n != null && n.bestMove != null) s.legalMoves.remove(n.bestMove);
             for (Move km : this.killerMoves.getKillerMoves(depth)) {
                 if (km == null) break; // no more killer moves
-                if (!s.legalMoves.contains(km)) continue; // not a legal move
-                s.legalMoves.remove(km);
+                if (!s.legalMoves.remove(km)) continue; // not a legal move
                 value = (short)-negamax(s.deepStep(km), (byte)(depth - 1), -beta, -alpha);
                 if (value > score) {
                     score = value;
@@ -136,7 +137,8 @@ public class NegaMaxPlus implements Agent {
                     this.hh.updateHistoryScore(km);
                     break;
                 }
-                if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
+                if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
+                        && System.currentTimeMillis() - this.startTime > this.timeLimit) {
                     this.timeOut = true;
                     break; // time is up
                 }
@@ -164,7 +166,8 @@ public class NegaMaxPlus implements Agent {
                     }
                     break;
                 }
-                if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
+                if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
+                        && System.currentTimeMillis() - this.startTime > this.timeLimit) {
                     this.timeOut = true;
                     break; // time is up
                 }
@@ -173,7 +176,7 @@ public class NegaMaxPlus implements Agent {
 
         // store the result in the transposition table
         Flag flag = score <= oldAlpha ? Flag.UPPERBOUND : (score >= beta ? Flag.LOWERBOUND : Flag.EXACT);
-        if (depth == this.DEPTH || !this.timeOut) this.tt.store(s, score, flag, bestMove, depth);
+        if (!this.timeOut || depth == this.DEPTH) this.tt.store(s, score, flag, bestMove, depth);
         return score;
     }
 }

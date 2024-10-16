@@ -3,26 +3,30 @@ package Fianco.AI.util;
 import Fianco.GameLogic.Move;
 
 public class KillerMoves {
-
-    public static final int N_MOVES = 2;
     
     public Move[][] killerMoves;
 
     public KillerMoves(int maxDepth) {
-        this.killerMoves = new Move[maxDepth][N_MOVES];
+        this.killerMoves = new Move[maxDepth + 1][2];
     }
 
     public void addKillerMove(int depth, Move move) {
-        for (int i = 0; i < N_MOVES; i++) { // first look for match or empty slot
-            if (move.equals(this.killerMoves[depth][i])) return;
-            if (this.killerMoves[depth][i] == null) {
-                this.killerMoves[depth][i] = move;
-                return;
-            }
+        // check first slot
+        if (this.killerMoves[depth][0] == null) {
+            this.killerMoves[depth][0] = move;
+            return;
         }
-        for (int i = N_MOVES - 1; i > 0; i--) { // shift all moves right
-            this.killerMoves[depth][i] = this.killerMoves[depth][i - 1];
+        if (move.equals(this.killerMoves[depth][0])) return;
+
+        // check second slot
+        if (this.killerMoves[depth][1] == null) {
+            this.killerMoves[depth][1] = move;
+            return;
         }
+        if (move.equals(this.killerMoves[depth][1])) return;
+
+        // shift all moves right
+        this.killerMoves[depth][1] = this.killerMoves[depth][0];
         this.killerMoves[depth][0] = move;
     }
 

@@ -12,6 +12,7 @@ public class NegaMaxID implements Agent {
     public static final int DELTA = 10;
     public static final int TARGET_TIME = 5000;
     public static final int MAX_DEPTH = 64;
+    public static final int MIN_DEPTH = 8;
 
     public TranspositionTable tt = new TranspositionTable();
 
@@ -113,15 +114,15 @@ public class NegaMaxID implements Agent {
             if (score >= beta) {
                 break; // beta cutoff
             }
-            if (depth >= this.timeCheckDepth && System.currentTimeMillis() - this.startTime > this.timeLimit) {
-                this.timeOut = true;
-                break; // time is up
+            if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
+                    && System.currentTimeMillis() - this.startTime > this.timeLimit) {
+                this.timeOut = true; // time is up
             }
         }
 
         // store the result in the transposition table
         Flag flag = score <= oldAlpha ? Flag.UPPERBOUND : (score >= beta ? Flag.LOWERBOUND : Flag.EXACT);
-        if (depth == this.DEPTH || !this.timeOut) this.tt.store(s, score, flag, bestMove, depth);
+        if (!this.timeOut || depth == this.DEPTH) this.tt.store(s, score, flag, bestMove, depth);
         return score;
     }
 }
