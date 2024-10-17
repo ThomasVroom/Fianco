@@ -11,8 +11,8 @@ import Fianco.GameLogic.Move;
 
 public class NegaMaxQS implements Agent {
 
-    public static final int DELTA = 10;
-    public static final int TARGET_TIME = 5000;
+    public static final int DELTA = 100;
+    public static final int TARGET_TIME = 9000;
     public static final int MAX_DEPTH = 64;
     public static final int MIN_DEPTH = 8;
 
@@ -97,7 +97,7 @@ public class NegaMaxQS implements Agent {
 
         // maximum depth or terminal state
         if (depth == 0 || s.p1Win || s.p2Win) {
-            return quiescenceSearch(s, alpha, beta);
+            return quiescenceSearch(s, alpha, beta, depth);
         }
 
         // negamax search
@@ -191,14 +191,14 @@ public class NegaMaxQS implements Agent {
         return score;
     }
 
-    public short quiescenceSearch(GameState s, int alpha, int beta) {
-        short score = (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, 0));
+    public short quiescenceSearch(GameState s, int alpha, int beta, byte depth) {
+        short score = (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, depth));
         if (score >= beta || s.p1Win || s.p2Win) return score;
         if (score > alpha) alpha = score;
         s.computeLegalMoves();
         for (Move m : s.legalMoves) {
             if (!m.isCapture) break; // only consider captures
-            score = (short)-quiescenceSearch(s.deepStep(m), -beta, -alpha);
+            score = (short)-quiescenceSearch(s.deepStep(m), -beta, -alpha, (byte)(depth - 1));
             if (score >= beta) break;
             if (score > alpha) alpha = score;
         }

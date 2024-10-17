@@ -6,7 +6,7 @@ import Fianco.GameLogic.InputController.PlayerType;
 public class Main {
 
     public static void main(String[] args) {
-        Thread game = new Thread(new Engine(PlayerType.NEGAMAXQS, PlayerType.NEGAMAXPLUS));
+        Thread game = new Thread(new Engine(PlayerType.NEGAMAXQS, PlayerType.NEGAMAXQS));
         game.start();
     }
 }

@@ -13,7 +13,7 @@ public class HistoryHeuristic {
     }
 
     public void updateHistoryScore(Move move, byte depth, boolean turnIsP1) {
-        this.hhScore[move.from][move.to][turnIsP1 ? 0 : 1] += depth * depth;
+        this.hhScore[move.from][move.to][turnIsP1 ? 0 : 1] += depth;
     }
 
     public final Comparator<Move> P1_COMPARATOR = (m1, m2) -> {
