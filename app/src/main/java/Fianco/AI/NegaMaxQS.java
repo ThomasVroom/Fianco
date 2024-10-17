@@ -46,6 +46,7 @@ public class NegaMaxQS implements Agent {
             this.timeCheckDepth = (int)(0.9f * DEPTH);
             this.moveCounter = 0;
             int score = negamax(state, DEPTH, guess - DELTA, guess + DELTA);
+
             if (score >= guess + DELTA) { // fail high
                 this.timeOut = false;
                 System.out.println("\u001B[31mFail high (" + score + ">=" + guess + ") at depth " + DEPTH + "\u001B[0m");
@@ -96,7 +97,7 @@ public class NegaMaxQS implements Agent {
 
         // maximum depth or terminal state
         if (depth == 0 || s.p1Win || s.p2Win) {
-            return quiescenceSearch(s, -beta, -alpha);
+            return quiescenceSearch(s, alpha, beta);
         }
 
         // negamax search
@@ -117,7 +118,7 @@ public class NegaMaxQS implements Agent {
             }
             alpha = Math.max(alpha, score);
             if (score >= beta) { // beta cutoff
-                if (!n.bestMove.isCapture) this.hh.updateHistoryScore(n.bestMove);
+                if (!n.bestMove.isCapture) this.hh.updateHistoryScore(n.bestMove, depth, s.turnIsP1);
             }
             if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
                     && System.currentTimeMillis() - this.startTime > this.timeLimit) {
@@ -139,7 +140,7 @@ public class NegaMaxQS implements Agent {
                 }
                 alpha = Math.max(alpha, score);
                 if (score >= beta) { // beta cutoff
-                    this.hh.updateHistoryScore(km);
+                    this.hh.updateHistoryScore(km, depth, s.turnIsP1);
                     break;
                 }
                 if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
@@ -153,7 +154,7 @@ public class NegaMaxQS implements Agent {
         // try all other moves
         if (score < beta && !this.timeOut) {
             // sort by history heuristic
-            s.legalMoves.sort(this.hh.COMPARATOR);
+            s.legalMoves.sort(s.turnIsP1 ? this.hh.P1_COMPARATOR : this.hh.P2_COMPARATOR);
 
             for (Move m : s.legalMoves) {
                 if (depth == this.DEPTH) this.moveCounter++; // for printing
@@ -172,7 +173,7 @@ public class NegaMaxQS implements Agent {
                     // update heuristics
                     if (!m.isCapture) {
                         this.killerMoves.addKillerMove(depth, m);
-                        this.hh.updateHistoryScore(m);
+                        this.hh.updateHistoryScore(m, depth, s.turnIsP1);
                     }
                     break;
                 }
@@ -192,7 +193,7 @@ public class NegaMaxQS implements Agent {
 
     public short quiescenceSearch(GameState s, int alpha, int beta) {
         short score = (short)((s.turnIsP1 ? 1 : -1) * Eval.getGlobalScore(s, 0));
-        if (score >= beta) return score;
+        if (score >= beta || s.p1Win || s.p2Win) return score;
         if (score > alpha) alpha = score;
         s.computeLegalMoves();
         for (Move m : s.legalMoves) {

@@ -6,7 +6,6 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
 - Experiments and plots are recommended.
 - Mention failed experiments (bitboards, etc.)
 
-- PVS
 - null move (?)
  - not in root
  - not after capture
@@ -20,17 +19,17 @@ A small Java-based [Fianco](http://www.di.fc.ul.pt/~jpn/gv/fianco.htm) implement
 - PN search?
 - optimize time alocation
 
-|                        | NegaMax | NegaMaxID | NegaMaxPlus | NegaMaxQS |
-|------------------------|:-------:|:---------:|:-----------:|:---------:|
-| NegaMax                |    x    |     x     |      x      |     x     |
-| $\alpha\beta$-Pruning  |    x    |     x     |      x      |     x     |
-| Iterative Deepening    |         |     x     |      x      |     x     |
-| Windows                |         |     x     |      x      |     x     |
-| Smart Termination*     |         |     x     |      x      |     x     |
-| Transposition Tables   |         |     x     |      x      |     x     |
-| Killer Moves           |         |           |      x      |     x     |
-| History Heuristic      |         |           |      x      |     x     |
-| Fractional Plies       |         |           |             |     x     |
-| Quiescence Search      |         |           |             |     x     |
+|                       | NegaMax | NegaMaxID | NegaMaxPlus | NegaMaxQS |
+|-----------------------|:-------:|:---------:|:-----------:|:---------:|
+| NegaMax               |    x    |     x     |      x      |     x     |
+| $\alpha\beta$-Pruning |    x    |     x     |      x      |     x     |
+| Iterative Deepening   |         |     x     |      x      |     x     |
+| Aspiration Search     |         |     x     |      x      |     x     |
+| Smart Termination*    |         |     x     |      x      |     x     |
+| Transposition Tables  |         |     x     |      x      |     x     |
+| Killer Moves          |         |           |      x      |     x     |
+| History Heuristic     |         |           |      x      |     x     |
+| Fractional Plies      |         |           |             |     x     |
+| Quiescence Search     |         |           |             |     x     |
 
-*Smart Termination: uses a simple non-linear function to calculate the time available per move, aiming to spend not more than 10 minutes per game in total. Search is terminated early if this time limit is hit or if a move is found that guarantees a win.
+*Smart Termination: uses a simple non-linear function to calculate the time available per move, aiming to spend no more than 10 minutes per game. Search is terminated early if this time limit is hit or if a move is found that guarantees a win.

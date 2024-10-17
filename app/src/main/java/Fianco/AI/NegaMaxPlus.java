@@ -112,7 +112,7 @@ public class NegaMaxPlus implements Agent {
             }
             alpha = Math.max(alpha, score);
             if (score >= beta) { // beta cutoff
-                if (!n.bestMove.isCapture) this.hh.updateHistoryScore(n.bestMove);
+                if (!n.bestMove.isCapture) this.hh.updateHistoryScore(n.bestMove, depth, s.turnIsP1);
             }
             if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
                     && System.currentTimeMillis() - this.startTime > this.timeLimit) {
@@ -134,7 +134,7 @@ public class NegaMaxPlus implements Agent {
                 }
                 alpha = Math.max(alpha, score);
                 if (score >= beta) { // beta cutoff
-                    this.hh.updateHistoryScore(km);
+                    this.hh.updateHistoryScore(km, depth, s.turnIsP1);
                     break;
                 }
                 if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
@@ -148,7 +148,7 @@ public class NegaMaxPlus implements Agent {
         // try all other moves
         if (score < beta && !this.timeOut) {
             // sort by history heuristic
-            s.legalMoves.sort(this.hh.COMPARATOR);
+            s.legalMoves.sort(s.turnIsP1 ? this.hh.P1_COMPARATOR : this.hh.P2_COMPARATOR);
 
             for (Move m : s.legalMoves) {
                 if (depth == this.DEPTH) this.moveCounter++; // for printing
@@ -162,7 +162,7 @@ public class NegaMaxPlus implements Agent {
                     // update heuristics
                     if (!m.isCapture) {
                         this.killerMoves.addKillerMove(depth, m);
-                        this.hh.updateHistoryScore(m);
+                        this.hh.updateHistoryScore(m, depth, s.turnIsP1);
                     }
                     break;
                 }
