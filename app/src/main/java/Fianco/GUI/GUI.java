@@ -94,7 +94,7 @@ public class GUI extends JFrame {
         helpMenu.add(rules);
         JMenuItem about = new JMenuItem("About");
         JEditorPane aboutMessage = new JEditorPane("text/html", ""+
-        "<center>Developed by Thomas Vroom, Maastricht University (©2024).</center>\n"+
+        "<center>Developed by Thomas Vroom, Maastricht University (2024).</center>\n"+
         "<center>Fianco is a game by Fred Horn (©1987).</center>\n"+
         "<center><a href=\"http://www.di.fc.ul.pt/~jpn/gv/fianco.htm\">http://www.di.fc.ul.pt/~jpn/gv/fianco.htm</a></center>");
         aboutMessage.setEditable(false);
