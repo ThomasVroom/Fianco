@@ -19,6 +19,7 @@ A player wins by moving one of their stones to the opposite side of the board.
 
 Select a player type for both P1 and P2 in `Main.java`:
  - `HUMAN`: Human operator.
+ - `RANDOM`: A random agent.
  - `NegaMax`: A minimal NegaMax implementation.
  - `NegaMaxID`: NegaMax with iterative deepening.
  - `NegaMaxPlus`: NegaMax with various heuristics.

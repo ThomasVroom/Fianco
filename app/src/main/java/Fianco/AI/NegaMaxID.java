@@ -43,12 +43,12 @@ public class NegaMaxID implements Agent {
             this.moveCounter = 0;
             int score = negamax(state, DEPTH, guess - DELTA, guess + DELTA);
             if (score >= guess + DELTA) { // fail high
-                this.moveCounter = 0; this.timeOut = false;
+                this.timeOut = false;
                 System.out.println("\u001B[31mFail high (" + score + ">=" + guess + ") at depth " + DEPTH + "\u001B[0m");
                 score = negamax(state, DEPTH, score, Eval.MAX_VALUE);
             }
             else if (score <= guess - DELTA) { // fail low
-                this.moveCounter = 0; this.timeOut = false;
+                this.timeOut = false;
                 System.out.println("\u001B[31mFail low (" + score + "<=" + guess + ") at depth " + DEPTH + "\u001B[0m");
                 score = negamax(state, DEPTH, Eval.MIN_VALUE, score);
             }
@@ -117,6 +117,7 @@ public class NegaMaxID implements Agent {
             if (DEPTH >= MIN_DEPTH && depth >= this.timeCheckDepth
                     && System.currentTimeMillis() - this.startTime > this.timeLimit) {
                 this.timeOut = true; // time is up
+                break;
             }
         }
 
